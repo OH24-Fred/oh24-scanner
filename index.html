@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Inventur Scanner – OnlineHandel24</title>
+<style>
+:root {
+  --bg: #1a1a2e; --bg2: #16213e; --bg3: #0f3460;
+  --accent: #e94560; --accent2: #0ea5e9; --green: #22c55e;
+  --orange: #f59e0b; --red: #ef4444; --text: #e2e8f0;
+  --text2: #94a3b8; --border: #334155;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; }
+.header { background: var(--bg2); border-bottom: 2px solid var(--accent); padding: 12px 16px; text-align: center; }
+.header h1 { font-size: 18px; } .header h1 span { color: var(--accent); }
+.header-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+#syncBadge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.sync-ok { background: rgba(34,197,94,0.2); color: var(--green); }
+.sync-off { background: rgba(239,68,68,0.2); color: var(--red); }
+.container { padding: 16px; max-width: 500px; margin: 0 auto; }
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.panel-title { font-size: 14px; font-weight: 600; color: var(--accent2); margin-bottom: 10px; }
+input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; }
+input:focus, select:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
+.scan-input { font-size: 28px; text-align: center; font-family: 'Courier New', monospace; letter-spacing: 3px; padding: 16px; }
+.scan-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.3); }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+.btn-save { background: var(--green); color: #000; }
+.btn-save:active { background: #16a34a; }
+.btn-save:disabled { opacity: 0.4; }
+.btn-camera { background: var(--accent2); color: #fff; font-size: 14px; padding: 10px; }
+.qty-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.qty-btn { width: 50px; height: 50px; border: none; border-radius: 8px; font-size: 24px; font-weight: 700; cursor: pointer; background: var(--bg3); color: var(--text); }
+.qty-btn:active { background: var(--accent2); }
+.qty-val { font-size: 36px; font-weight: 700; text-align: center; flex: 1; color: var(--accent2); }
+.product-info { background: var(--bg); border: 2px solid var(--green); border-radius: 8px; padding: 14px; margin: 12px 0; display: none; }
+.product-info.show { display: block; }
+.product-info .title { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+.product-info .meta { font-size: 12px; color: var(--text2); }
+.product-info .meta b { color: var(--text); }
+.not-found { background: var(--bg); border: 2px solid var(--orange); border-radius: 8px; padding: 14px; margin: 12px 0; display: none; text-align: center; color: var(--orange); }
+.not-found.show { display: block; }
+.success-msg { background: rgba(34,197,94,0.15); border: 1px solid var(--green); color: var(--green); padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin: 10px 0; display: none; }
+.success-msg.show { display: block; animation: fadeout 2s 1s forwards; }
+@keyframes fadeout { to { opacity: 0; } }
+.log { font-size: 12px; max-height: 200px; overflow-y: auto; }
+.log-item { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.log-time { color: var(--text2); font-family: monospace; }
+.video-wrap { position: relative; border-radius: 8px; overflow: hidden; margin: 10px 0; display: none; }
+.video-wrap.show { display: block; }
+.video-wrap video { width: 100%; display: block; }
+.setup-panel { text-align: center; padding: 30px 16px; }
+.setup-panel input { margin: 8px 0; }
+.setup-panel .btn { background: var(--accent2); color: #fff; margin-top: 16px; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Inventur <span>Scanner</span></h1>
+  <div class="header-sub">
+    OnlineHandel24 – Handy-Scanner
+    <span id="syncBadge" class="sync-off">Offline</span>
+  </div>
+</div>
+
+<!-- SETUP (Name + Lagerplatz wählen) -->
+<div class="container" id="setupView">
+  <div class="setup-panel">
+    <h2 style="margin-bottom:16px;color:var(--accent2)">Inventur starten</h2>
+    <input type="text" id="setupName" placeholder="Dein Name" style="font-size:18px">
+    <select id="setupLocation" style="font-size:16px;margin-top:10px">
+      <option value="">Lagerplatz wählen...</option>
+    </select>
+    <button class="btn" id="btnStart">Scannen starten</button>
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div class="container hidden" id="scanView">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="panel-title" style="margin:0">Scannen</div>
+      <div style="font-size:12px;color:var(--text2)">
+        <span id="currentUser">-</span> | <span id="currentLoc">-</span>
+        <span style="cursor:pointer;color:var(--accent2);margin-left:6px" id="btnChangeLoc">ändern</span>
+      </div>
+    </div>
+    <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none">
+    <button class="btn btn-camera" id="btnCamera">Kamera öffnen</button>
+    <div class="video-wrap" id="cameraWrap">
+      <video id="cameraVideo" autoplay playsinline></video>
+    </div>
+  </div>
+
+  <!-- Produkt gefunden -->
+  <div class="product-info" id="productCard">
+    <div class="title" id="piTitle">-</div>
+    <div class="meta">
+      <div>ASIN: <b id="piAsin">-</b> | EAN: <b id="piEan">-</b></div>
+      <div>FNSKU: <b id="piFnsku">-</b> | EK: <b id="piEk">-</b></div>
+    </div>
+    <div class="qty-row">
+      <button class="qty-btn" id="btnMinus">−</button>
+      <div class="qty-val" id="qtyVal">1</div>
+      <button class="qty-btn" id="btnPlus">+</button>
+    </div>
+    <button class="btn btn-save" id="btnSave">Speichern</button>
+  </div>
+
+  <!-- Nicht gefunden -->
+  <div class="not-found" id="notFoundCard">
+    <div style="font-size:18px;font-weight:700;margin-bottom:6px">Nicht gefunden</div>
+    <div id="nfCode" style="font-family:monospace;font-size:16px">-</div>
+  </div>
+
+  <!-- Erfolg -->
+  <div class="success-msg" id="successMsg">Gespeichert!</div>
+
+  <!-- Log -->
+  <div class="panel">
+    <div class="panel-title">Letzte Scans (<span id="scanCount">0</span>)</div>
+    <div class="log" id="scanLog"></div>
+  </div>
+</div>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+var SUPABASE_URL = 'https://absdvjltflmpvotlooqr.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_sTXv8uGyV7m3vdqWaBMehw_VhelLMHm';
+var sb = null;
+var connected = false;
+var PRODUCTS = {};
+var currentAsin = null;
+var currentQty = 1;
+var scanCount = 0;
+var cameraStream = null;
+var barcodeDetector = null;
+
+// Lagerplätze generieren
+var LOCATIONS = (function() {
+  var locs = [];
+  var gaenge = { 'A': 5, 'B': 5, 'C': 6, 'D': 6, 'E': 7 };
+
+  for (var g in gaenge) {
+    for (var r = 1; r <= gaenge[g]; r++) {
+      for (var e = 1; e <= 6; e++) {
+        locs.push(g + '-R' + String(r).padStart(2, '0') + '-E' + e);
+      }
+    }
+  }
+  for (var rw = 1; rw <= 2; rw++) {
+    for (var e = 1; e <= 6; e++) locs.push('RW-R' + String(rw).padStart(2,'0') + '-E' + e);
+  }
+  locs.push('BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT');
+  return locs;
+})();
+
+function initSupabase() {
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      connected = true;
+      document.getElementById('syncBadge').textContent = 'Verbunden';
+      document.getElementById('syncBadge').className = 'sync-ok';
+      loadProducts();
+    }
+  } catch(e) { console.error(e); }
+}
+
+function loadProducts() {
+  if (!sb) return;
+  sb.from('products').select('*').then(function(res) {
+    if (res.error) { console.error(res.error); return; }
+    var data = res.data || [];
+    for (var i = 0; i < data.length; i++) {
+      var p = data[i];
+      PRODUCTS[p.asin] = {
+        asin: p.asin, ean: p.ean, fnsku: p.fnsku, sku: p.sku,
+        title: p.title, ek: parseFloat(p.ek_netto) || 0
+      };
+    }
+    document.getElementById('syncBadge').textContent = 'Verbunden (' + data.length + ')';
+  });
+}
+
+function findProduct(code) {
+  var upper = code.toUpperCase();
+  // EAN
+  if (code.match(/^\d{13}$/)) {
+    for (var a in PRODUCTS) { if (PRODUCTS[a].ean === code) return a; }
+  }
+  // FNSKU
+  if (upper.indexOf('X0') === 0 || upper.match(/^X\d/)) {
+    for (var a in PRODUCTS) {
+      if (PRODUCTS[a].fnsku && PRODUCTS[a].fnsku.toUpperCase() === upper) return a;
+      if (PRODUCTS[a].sku && PRODUCTS[a].sku.toUpperCase() === upper) return a;
+    }
+  }
+  // ASIN
+  if (upper.indexOf('B0') === 0 && PRODUCTS[upper]) return upper;
+  // Fallback
+  for (var a in PRODUCTS) {
+    if (PRODUCTS[a].ean === code) return a;
+    if (PRODUCTS[a].fnsku && PRODUCTS[a].fnsku.toUpperCase() === upper) return a;
+    if (PRODUCTS[a].sku && PRODUCTS[a].sku.toUpperCase() === upper) return a;
+  }
+  return null;
+}
+
+function processScan() {
+  var input = document.getElementById('scanInput');
+  var code = input.value.trim();
+  if (!code) return;
+  var asin = findProduct(code);
+  if (asin && PRODUCTS[asin]) {
+    showProduct(asin);
+  } else {
+    document.getElementById('nfCode').textContent = code;
+    document.getElementById('notFoundCard').classList.add('show');
+    document.getElementById('productCard').classList.remove('show');
+    currentAsin = null;
+  }
+  input.value = '';
+}
+
+function showProduct(asin) {
+  var p = PRODUCTS[asin];
+  currentAsin = asin;
+  currentQty = 1;
+  document.getElementById('piTitle').textContent = p.title || '(kein Titel)';
+  document.getElementById('piAsin').textContent = asin;
+  document.getElementById('piEan').textContent = p.ean || '-';
+  document.getElementById('piFnsku').textContent = p.fnsku || '-';
+  document.getElementById('piEk').textContent = p.ek ? p.ek.toFixed(2) + ' EUR' : '-';
+  document.getElementById('qtyVal').textContent = '1';
+  document.getElementById('productCard').classList.add('show');
+  document.getElementById('notFoundCard').classList.remove('show');
+  // Vibration als Feedback
+  if (navigator.vibrate) navigator.vibrate(100);
+}
+
+function saveCount() {
+  if (!currentAsin || !connected) return;
+  var location = document.getElementById('setupLocation').value;
+  var user = document.getElementById('setupName').value || 'Handy';
+  var timestamp = new Date().toISOString();
+  // An Supabase senden
+  sb.from('inventory_counts').upsert({
+    asin: currentAsin, qty: currentQty, location: location,
+    condition: 'neu', counted_by: user, scan_code: '', counted_at: timestamp
+  }, { onConflict: 'asin,location' }).then(function(res) {
+    if (res.error) { alert('Fehler: ' + res.error.message); return; }
+    // Scan-Log
+    sb.from('scan_log').insert({
+      asin: currentAsin, scan_code: '', qty: currentQty,
+      location: location, scanned_by: user
+    });
+  });
+  // Erfolg anzeigen
+  var msg = document.getElementById('successMsg');
+  msg.textContent = currentQty + 'x gespeichert!';
+  msg.classList.add('show');
+  setTimeout(function() { msg.classList.remove('show'); }, 3000);
+  // Log
+  scanCount++;
+  document.getElementById('scanCount').textContent = scanCount;
+  var log = document.getElementById('scanLog');
+  var title = (PRODUCTS[currentAsin].title || currentAsin).substring(0, 30);
+  var time = new Date().toLocaleTimeString('de-DE');
+  log.innerHTML = '<div class="log-item"><span><b>' + currentQty + 'x</b> ' + title + '</span><span class="log-time">' + time + '</span></div>' + log.innerHTML;
+  // Reset
+  document.getElementById('productCard').classList.remove('show');
+  currentAsin = null;
+  document.getElementById('scanInput').focus();
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+}
+
+function toggleCamera() {
+  var wrap = document.getElementById('cameraWrap');
+  var btn = document.getElementById('btnCamera');
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(function(t) { t.stop(); });
+    cameraStream = null;
+    wrap.classList.remove('show');
+    btn.textContent = 'Kamera öffnen';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+  }).then(function(stream) {
+    cameraStream = stream;
+    document.getElementById('cameraVideo').srcObject = stream;
+    wrap.classList.add('show');
+    btn.textContent = 'Kamera schließen';
+    if (barcodeDetector) detectLoop();
+  }).catch(function(e) { alert('Kamera: ' + e.message); });
+}
+
+function detectLoop() {
+  if (!cameraStream || !barcodeDetector) return;
+  var video = document.getElementById('cameraVideo');
+  barcodeDetector.detect(video).then(function(codes) {
+    if (codes.length > 0) {
+      document.getElementById('scanInput').value = codes[0].rawValue;
+      processScan();
+      setTimeout(function() { if (cameraStream) requestAnimationFrame(detectLoop); }, 2000);
+    } else {
+      if (cameraStream) requestAnimationFrame(detectLoop);
+    }
+  }).catch(function() {
+    if (cameraStream) requestAnimationFrame(detectLoop);
+  });
+}
+
+function init() {
+  // Lagerplätze befüllen
+  var sel = document.getElementById('setupLocation');
+  for (var i = 0; i < LOCATIONS.length; i++) {
+    sel.innerHTML += '<option value="' + LOCATIONS[i] + '">' + LOCATIONS[i] + '</option>';
+  }
+  // Gespeicherten Namen laden
+  var savedName = localStorage.getItem('inv_scanner_name') || '';
+  var savedLoc = localStorage.getItem('inv_scanner_loc') || '';
+  if (savedName) document.getElementById('setupName').value = savedName;
+  if (savedLoc) document.getElementById('setupLocation').value = savedLoc;
+  // Barcode Detector
+  if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'code_39'] });
+  }
+  // Events
+  document.getElementById('btnStart').addEventListener('click', function() {
+    var name = document.getElementById('setupName').value.trim();
+    var loc = document.getElementById('setupLocation').value;
+    if (!name) { alert('Bitte Name eingeben!'); return; }
+    if (!loc) { alert('Bitte Lagerplatz wählen!'); return; }
+    localStorage.setItem('inv_scanner_name', name);
+    localStorage.setItem('inv_scanner_loc', loc);
+    document.getElementById('currentUser').textContent = name;
+    document.getElementById('currentLoc').textContent = loc;
+    document.getElementById('setupView').classList.add('hidden');
+    document.getElementById('scanView').classList.remove('hidden');
+    document.getElementById('scanInput').focus();
+  });
+  document.getElementById('scanInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') processScan();
+  });
+  document.getElementById('btnSave').addEventListener('click', saveCount);
+  document.getElementById('btnCamera').addEventListener('click', toggleCamera);
+  document.getElementById('btnPlus').addEventListener('click', function() {
+    currentQty++;
+    document.getElementById('qtyVal').textContent = currentQty;
+  });
+  document.getElementById('btnMinus').addEventListener('click', function() {
+    if (currentQty > 1) currentQty--;
+    document.getElementById('qtyVal').textContent = currentQty;
+  });
+  document.getElementById('btnChangeLoc').addEventListener('click', function() {
+    document.getElementById('scanView').classList.add('hidden');
+    document.getElementById('setupView').classList.remove('hidden');
+  });
+  initSupabase();
+}
+
+try { init(); } catch(e) { alert('Fehler: ' + e.message); }
+</script>
+</body>
+</html>
