@@ -12,345 +12,757 @@
   --text2: #94a3b8; --border: #334155;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; }
-.header { background: var(--bg2); border-bottom: 2px solid var(--accent); padding: 12px 16px; text-align: center; }
-.header h1 { font-size: 18px; } .header h1 span { color: var(--accent); }
-.header-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; -webkit-user-select: none; user-select: none; }
+
+.header { background: var(--bg2); border-bottom: 2px solid var(--accent); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 17px; } .header h1 span { color: var(--accent); }
+.header-right { text-align: right; }
 #syncBadge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
 .sync-ok { background: rgba(34,197,94,0.2); color: var(--green); }
 .sync-off { background: rgba(239,68,68,0.2); color: var(--red); }
-.container { padding: 16px; max-width: 500px; margin: 0 auto; }
-.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
-.panel-title { font-size: 14px; font-weight: 600; color: var(--accent2); margin-bottom: 10px; }
+.stats-line { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.container { padding: 12px; max-width: 500px; margin: 0 auto; }
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.panel-sm { padding: 10px 14px; }
+.panel-title { font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 8px; }
+
 input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; }
 input:focus, select:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
-.scan-input { font-size: 28px; text-align: center; font-family: 'Courier New', monospace; letter-spacing: 3px; padding: 16px; }
-.scan-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.3); }
-.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-.btn-save { background: var(--green); color: #000; }
-.btn-save:active { background: #16a34a; }
-.btn-save:disabled { opacity: 0.4; }
+
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: opacity 0.1s; }
+.btn:active { opacity: 0.7; }
+.btn-save { background: var(--green); color: #000; font-size: 20px; }
+.btn-save:disabled { opacity: 0.3; }
 .btn-camera { background: var(--accent2); color: #fff; font-size: 14px; padding: 10px; }
-.qty-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
-.qty-btn { width: 50px; height: 50px; border: none; border-radius: 8px; font-size: 24px; font-weight: 700; cursor: pointer; background: var(--bg3); color: var(--text); }
-.qty-btn:active { background: var(--accent2); }
-.qty-val { font-size: 36px; font-weight: 700; text-align: center; flex: 1; color: var(--accent2); }
-.product-info { background: var(--bg); border: 2px solid var(--green); border-radius: 8px; padding: 14px; margin: 12px 0; display: none; }
-.product-info.show { display: block; }
+.btn-undo { background: var(--orange); color: #000; font-size: 14px; padding: 10px; }
+.btn-start { background: var(--accent2); color: #fff; }
+.btn-sm { width: auto; padding: 8px 16px; margin: 0; font-size: 13px; }
+
+/* STEP INDICATOR */
+.steps { display: flex; gap: 4px; margin-bottom: 14px; }
+.step { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--text2); border: 2px solid transparent; transition: all 0.2s; }
+.step.active { background: var(--bg3); color: var(--accent2); border-color: var(--accent2); }
+.step.done { background: rgba(34,197,94,0.15); color: var(--green); border-color: var(--green); }
+.step-num { font-size: 16px; display: block; margin-bottom: 2px; }
+
+/* LOCATION BADGE */
+.loc-badge { background: var(--bg3); border: 2px solid var(--accent2); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 12px; }
+.loc-badge .loc-name { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--accent2); letter-spacing: 2px; }
+.loc-badge .loc-detail { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.loc-badge.scanned { border-color: var(--green); }
+.loc-badge.scanned .loc-name { color: var(--green); }
+
+/* SCAN INPUT */
+.scan-input { font-size: 24px; text-align: center; font-family: 'Courier New', monospace; letter-spacing: 2px; padding: 14px; }
+
+/* PRODUCT INFO */
+.product-info { background: var(--bg); border: 2px solid var(--green); border-radius: 10px; padding: 14px; margin: 10px 0; }
 .product-info .title { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
 .product-info .meta { font-size: 12px; color: var(--text2); }
 .product-info .meta b { color: var(--text); }
-.not-found { background: var(--bg); border: 2px solid var(--orange); border-radius: 8px; padding: 14px; margin: 12px 0; display: none; text-align: center; color: var(--orange); }
-.not-found.show { display: block; }
-.success-msg { background: rgba(34,197,94,0.15); border: 1px solid var(--green); color: var(--green); padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin: 10px 0; display: none; }
-.success-msg.show { display: block; animation: fadeout 2s 1s forwards; }
-@keyframes fadeout { to { opacity: 0; } }
-.log { font-size: 12px; max-height: 200px; overflow-y: auto; }
-.log-item { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-.log-time { color: var(--text2); font-family: monospace; }
-.video-wrap { position: relative; border-radius: 8px; overflow: hidden; margin: 10px 0; display: none; }
-.video-wrap.show { display: block; }
+
+/* QUANTITY */
+.qty-row { display: flex; align-items: center; gap: 8px; margin: 12px 0; }
+.qty-btn { width: 56px; height: 56px; border: none; border-radius: 10px; font-size: 28px; font-weight: 700; cursor: pointer; background: var(--bg3); color: var(--text); }
+.qty-btn:active { background: var(--accent2); }
+.qty-val { font-size: 42px; font-weight: 700; text-align: center; flex: 1; color: var(--accent2); font-family: 'Courier New', monospace; }
+
+/* NOT FOUND */
+.not-found { background: var(--bg); border: 2px solid var(--orange); border-radius: 10px; padding: 14px; text-align: center; color: var(--orange); }
+
+/* FEEDBACK OVERLAY */
+.feedback-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 999; pointer-events: none; animation: fbFade 1.5s forwards; }
+.feedback-overlay .fb-icon { font-size: 80px; }
+.feedback-overlay .fb-text { font-size: 20px; font-weight: 700; margin-top: 10px; }
+.fb-success { background: rgba(34,197,94,0.25); }
+.fb-success .fb-icon, .fb-success .fb-text { color: var(--green); }
+.fb-error { background: rgba(239,68,68,0.25); }
+.fb-error .fb-icon, .fb-error .fb-text { color: var(--red); }
+@keyframes fbFade { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+/* LOG */
+.log { font-size: 12px; max-height: 250px; overflow-y: auto; }
+.log-item { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.log-item .log-loc { color: var(--accent2); font-family: monospace; font-size: 11px; }
+.log-item .log-product { flex: 1; margin: 0 8px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-item .log-qty { color: var(--green); font-weight: 700; font-size: 13px; min-width: 30px; text-align: right; }
+.log-item .log-time { color: var(--text2); font-family: monospace; font-size: 10px; min-width: 50px; text-align: right; }
+
+/* CAMERA */
+.video-wrap { position: relative; border-radius: 10px; overflow: hidden; margin: 10px 0; }
 .video-wrap video { width: 100%; display: block; }
-.setup-panel { text-align: center; padding: 30px 16px; }
-.setup-panel input { margin: 8px 0; }
-.setup-panel .btn { background: var(--accent2); color: #fff; margin-top: 16px; }
+.scan-line { position: absolute; top: 50%; left: 10%; width: 80%; height: 2px; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: scanPulse 1.5s infinite; }
+@keyframes scanPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+/* html5-qrcode Styling */
+#qr-reader { border-radius: 10px; overflow: hidden; margin: 10px 0; }
+#qr-reader video { border-radius: 10px; }
+#qr-reader__scan_region { background: var(--bg) !important; }
+#qr-reader__dashboard { background: var(--bg2) !important; color: var(--text) !important; padding: 8px !important; }
+#qr-reader__dashboard button { background: var(--accent2) !important; color: #fff !important; border: none !important; border-radius: 6px !important; padding: 8px 16px !important; font-size: 14px !important; cursor: pointer !important; }
+#qr-reader__dashboard select { background: var(--bg) !important; color: var(--text) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; padding: 4px 8px !important; }
+#qr-reader__dashboard span { color: var(--text2) !important; }
+#qr-reader__header_message { display: none !important; }
+
 .hidden { display: none !important; }
+.mt { margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>Inventur <span>Scanner</span></h1>
-  <div class="header-sub">
-    OnlineHandel24 – Handy-Scanner
+  <div>
+    <h1>Inventur <span>Scanner</span></h1>
+  </div>
+  <div class="header-right">
     <span id="syncBadge" class="sync-off">Offline</span>
+    <div class="stats-line"><span id="statsLine">0 Scans</span></div>
   </div>
 </div>
 
-<!-- SETUP (Name + Lagerplatz wählen) -->
+<!-- ===== SETUP VIEW ===== -->
 <div class="container" id="setupView">
-  <div class="setup-panel">
+  <div class="panel" style="text-align:center;padding:30px 16px">
     <h2 style="margin-bottom:16px;color:var(--accent2)">Inventur starten</h2>
-    <input type="text" id="setupName" placeholder="Dein Name" style="font-size:18px">
-    <select id="setupLocation" style="font-size:16px;margin-top:10px">
-      <option value="">Lagerplatz wählen...</option>
-    </select>
-    <button class="btn" id="btnStart">Scannen starten</button>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px">
+      Name eingeben und los. Lagerplatz wird per QR-Code am Regal gescannt.
+    </p>
+    <input type="text" id="setupName" placeholder="Dein Name" style="font-size:18px;text-align:center" autocomplete="off">
+    <button class="btn btn-start" id="btnStart">Scannen starten</button>
   </div>
 </div>
 
-<!-- SCANNER -->
+<!-- ===== SCANNER VIEW ===== -->
 <div class="container hidden" id="scanView">
-  <div class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="panel-title" style="margin:0">Scannen</div>
-      <div style="font-size:12px;color:var(--text2)">
-        <span id="currentUser">-</span> | <span id="currentLoc">-</span>
-        <span style="cursor:pointer;color:var(--accent2);margin-left:6px" id="btnChangeLoc">ändern</span>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="step active" id="step1">
+      <span class="step-num">1</span>Regal
+    </div>
+    <div class="step" id="step2">
+      <span class="step-num">2</span>Produkt
+    </div>
+    <div class="step" id="step3">
+      <span class="step-num">3</span>Menge
+    </div>
+  </div>
+
+  <!-- LOCATION BADGE -->
+  <div class="loc-badge" id="locBadge">
+    <div class="loc-name" id="locName">– kein Regal –</div>
+    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal</div>
+  </div>
+
+  <!-- SCAN INPUT + CAMERA -->
+  <div class="panel panel-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div class="panel-title" style="margin:0" id="scanLabel">Regal-QR scannen</div>
+      <span style="font-size:12px;color:var(--text2)" id="workerName">-</span>
+    </div>
+    <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none" autocomplete="off">
+    <button class="btn btn-camera" id="btnCamera">Kamera oeffnen</button>
+    <div id="qr-reader" class="hidden"></div>
+  </div>
+
+  <!-- PRODUCT INFO (Step 2/3) -->
+  <div class="hidden" id="productPanel">
+    <div class="product-info" id="productCard">
+      <div class="title" id="piTitle">-</div>
+      <div class="meta">
+        <div>EAN: <b id="piEan">-</b> | ASIN: <b id="piAsin">-</b></div>
+        <div>FNSKU: <b id="piFnsku">-</b> | EK: <b id="piEk">-</b></div>
       </div>
     </div>
-    <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none">
-    <button class="btn btn-camera" id="btnCamera">Kamera öffnen</button>
-    <div class="video-wrap" id="cameraWrap">
-      <video id="cameraVideo" autoplay playsinline></video>
-    </div>
-  </div>
-
-  <!-- Produkt gefunden -->
-  <div class="product-info" id="productCard">
-    <div class="title" id="piTitle">-</div>
-    <div class="meta">
-      <div>ASIN: <b id="piAsin">-</b> | EAN: <b id="piEan">-</b></div>
-      <div>FNSKU: <b id="piFnsku">-</b> | EK: <b id="piEk">-</b></div>
-    </div>
     <div class="qty-row">
-      <button class="qty-btn" id="btnMinus">−</button>
+      <button class="qty-btn" id="btnMinus">-</button>
       <div class="qty-val" id="qtyVal">1</div>
       <button class="qty-btn" id="btnPlus">+</button>
     </div>
     <button class="btn btn-save" id="btnSave">Speichern</button>
   </div>
 
-  <!-- Nicht gefunden -->
-  <div class="not-found" id="notFoundCard">
+  <!-- NOT FOUND -->
+  <div class="not-found hidden" id="notFoundCard">
     <div style="font-size:18px;font-weight:700;margin-bottom:6px">Nicht gefunden</div>
     <div id="nfCode" style="font-family:monospace;font-size:16px">-</div>
+    <p style="font-size:12px;margin-top:8px;color:var(--text2)">Manuell als unbekanntes Produkt erfassen?</p>
+    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem zaehlen</button>
   </div>
 
-  <!-- Erfolg -->
-  <div class="success-msg" id="successMsg">Gespeichert!</div>
+  <!-- UNDO -->
+  <div class="hidden" id="undoPanel" style="margin-bottom:12px">
+    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan rueckgaengig</button>
+  </div>
 
-  <!-- Log -->
-  <div class="panel">
-    <div class="panel-title">Letzte Scans (<span id="scanCount">0</span>)</div>
-    <div class="log" id="scanLog"></div>
+  <!-- LOG -->
+  <div class="panel panel-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="panel-title" style="margin:0">Letzte Scans (<span id="scanCount">0</span>)</div>
+      <button class="btn btn-sm" id="btnChangeLoc" style="background:var(--bg3);color:var(--accent2)">Regal wechseln</button>
+    </div>
+    <div class="log mt" id="scanLog"></div>
   </div>
 </div>
 
-<!-- Supabase JS -->
+<!-- SUPABASE + BARCODE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
+// ============================================================
+// CONFIG
+// ============================================================
 var SUPABASE_URL = 'https://absdvjltflmpvotlooqr.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_sTXv8uGyV7m3vdqWaBMehw_VhelLMHm';
+
 var sb = null;
 var connected = false;
 var PRODUCTS = {};
-var currentAsin = null;
+var currentLocation = '';
+var currentEan = '';
+var currentAsin = '';
+var currentProductName = '';
 var currentQty = 1;
 var scanCount = 0;
-var cameraStream = null;
-var barcodeDetector = null;
+var scanStep = 1; // 1=Regal, 2=Produkt, 3=Menge
+var html5QrCode = null;
+var cameraActive = false;
+var workerName = '';
+var sessionId = '';
+var audioCtx = null;
+var lastScanTime = 0;
 
-// Lagerplätze generieren
-var LOCATIONS = (function() {
-  var locs = [];
-  var gaenge = { 'A': 5, 'B': 5, 'C': 6, 'D': 6, 'E': 7 };
-
-  for (var g in gaenge) {
-    for (var r = 1; r <= gaenge[g]; r++) {
-      for (var e = 1; e <= 6; e++) {
-        locs.push(g + '-R' + String(r).padStart(2, '0') + '-E' + e);
-      }
-    }
+// ============================================================
+// AUDIO FEEDBACK (Web Audio API)
+// ============================================================
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  for (var rw = 1; rw <= 2; rw++) {
-    for (var e = 1; e <= 6; e++) locs.push('RW-R' + String(rw).padStart(2,'0') + '-E' + e);
-  }
-  locs.push('BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT');
-  return locs;
-})();
+  return audioCtx;
+}
 
+function playTone(freq, duration, type, volume) {
+  try {
+    var ctx = getAudioCtx();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = volume || 0.3;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (duration || 0.2));
+    osc.stop(ctx.currentTime + (duration || 0.2));
+  } catch(e) { /* Audio nicht verfuegbar */ }
+}
+
+function soundSuccess() {
+  playTone(880, 0.1, 'sine', 0.3);
+  setTimeout(function() { playTone(1320, 0.15, 'sine', 0.3); }, 100);
+  setTimeout(function() { playTone(1760, 0.2, 'sine', 0.3); }, 200);
+}
+
+function soundError() {
+  playTone(300, 0.3, 'square', 0.2);
+  setTimeout(function() { playTone(200, 0.4, 'square', 0.2); }, 300);
+}
+
+function soundLocationScanned() {
+  playTone(660, 0.1, 'sine', 0.25);
+  setTimeout(function() { playTone(880, 0.15, 'sine', 0.25); }, 120);
+}
+
+// ============================================================
+// FEEDBACK OVERLAY
+// ============================================================
+function showFeedback(type, icon, text) {
+  var old = document.querySelector('.feedback-overlay');
+  if (old) old.remove();
+  var div = document.createElement('div');
+  div.className = 'feedback-overlay ' + (type === 'success' ? 'fb-success' : 'fb-error');
+  div.innerHTML = '<div style="text-align:center"><div class="fb-icon">' + icon + '</div><div class="fb-text">' + text + '</div></div>';
+  document.body.appendChild(div);
+  if (navigator.vibrate) {
+    navigator.vibrate(type === 'success' ? [80, 40, 80] : [200, 100, 200]);
+  }
+  setTimeout(function() { if (div.parentNode) div.remove(); }, 1500);
+}
+
+// ============================================================
+// SUPABASE
+// ============================================================
 function initSupabase() {
   try {
     if (window.supabase && window.supabase.createClient) {
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       connected = true;
-      document.getElementById('syncBadge').textContent = 'Verbunden';
+      document.getElementById('syncBadge').textContent = 'Online';
       document.getElementById('syncBadge').className = 'sync-ok';
       loadProducts();
     }
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
 }
 
 function loadProducts() {
   if (!sb) return;
-  sb.from('products').select('*').then(function(res) {
-    if (res.error) { console.error(res.error); return; }
-    var data = res.data || [];
-    for (var i = 0; i < data.length; i++) {
-      var p = data[i];
-      PRODUCTS[p.asin] = {
-        asin: p.asin, ean: p.ean, fnsku: p.fnsku, sku: p.sku,
-        title: p.title, ek: parseFloat(p.ek_netto) || 0
-      };
+  sb.rpc('fetch_billbee_products', { p_page: 1, p_page_size: 250 }).then(function(res) {
+    if (res.error) {
+      console.log('Billbee RPC nicht verfuegbar, nutze lokale Daten');
+      return;
     }
-    document.getElementById('syncBadge').textContent = 'Verbunden (' + data.length + ')';
+    var data = res.data;
+    if (data && data.Data) {
+      var items = data.Data;
+      for (var i = 0; i < items.length; i++) {
+        var bp = items[i];
+        var ean = (bp.EAN || '').trim();
+        var sku = (bp.SKU || '').trim();
+        var title = '';
+        if (bp.Title && bp.Title.length) {
+          for (var t = 0; t < bp.Title.length; t++) {
+            if (bp.Title[t].LanguageCode === 'DE' || bp.Title[t].LanguageCode === 'de') {
+              title = bp.Title[t].Text; break;
+            }
+          }
+          if (!title) title = bp.Title[0].Text || '';
+        }
+        var asin = '';
+        var fnsku = '';
+        var asinMatch = sku.match(/(B0[A-Z0-9]{8})/i);
+        if (asinMatch) asin = asinMatch[1].toUpperCase();
+        var fnskuMatch = sku.match(/(X0[A-Z0-9]{8})/i);
+        if (fnskuMatch) fnsku = fnskuMatch[1].toUpperCase();
+        if (!ean && sku) {
+          var eanMatch = sku.match(/(\d{13})/);
+          if (eanMatch) ean = eanMatch[1];
+        }
+        if (bp.Sources && bp.Sources.length) {
+          for (var s = 0; s < bp.Sources.length; s++) {
+            var src = bp.Sources[s];
+            if (!asin && src.ExternalId && /^B0/i.test(src.ExternalId)) asin = src.ExternalId.toUpperCase();
+            if (!fnsku && src.Custom && src.Custom.FNSKU) fnsku = src.Custom.FNSKU;
+            if (!ean && src.Custom && src.Custom.EAN) ean = src.Custom.EAN;
+            if (!ean && src.ExternalId && /^\d{13}$/.test(src.ExternalId)) ean = src.ExternalId;
+          }
+        }
+        var key = asin || ean || ('BB_' + bp.BillbeeId);
+        var ekNetto = 0;
+        if (bp.Net) ekNetto = parseFloat(bp.Net) || 0;
+        PRODUCTS[key] = {
+          asin: asin,
+          ean: ean,
+          fnsku: fnsku,
+          sku: sku,
+          title: title,
+          ek: ekNetto,
+          billbeeId: bp.BillbeeId
+        };
+      }
+      var count = Object.keys(PRODUCTS).length;
+      document.getElementById('syncBadge').textContent = 'Online (' + count + ')';
+    }
   });
 }
 
-function findProduct(code) {
-  var upper = code.toUpperCase();
-  // EAN
-  if (code.match(/^\d{13}$/)) {
-    for (var a in PRODUCTS) { if (PRODUCTS[a].ean === code) return a; }
+// ============================================================
+// SAVE COUNT TO SUPABASE
+// ============================================================
+function saveToSupabase(location, ean, asin, productName, qty, callback) {
+  if (!sb) {
+    if (callback) callback(false, 'Keine Verbindung');
+    return;
   }
-  // FNSKU
-  if (upper.indexOf('X0') === 0 || upper.match(/^X\d/)) {
-    for (var a in PRODUCTS) {
-      if (PRODUCTS[a].fnsku && PRODUCTS[a].fnsku.toUpperCase() === upper) return a;
-      if (PRODUCTS[a].sku && PRODUCTS[a].sku.toUpperCase() === upper) return a;
+  sb.rpc('inventur_save_count', {
+    p_location: location,
+    p_ean: ean || null,
+    p_asin: asin || null,
+    p_product_name: productName || null,
+    p_quantity: qty,
+    p_worker: workerName,
+    p_condition: 'neu',
+    p_session_id: sessionId
+  }).then(function(res) {
+    if (res.error) {
+      if (callback) callback(false, res.error.message);
+    } else if (res.data && res.data.success) {
+      if (callback) callback(true);
+    } else {
+      if (callback) callback(false, res.data ? res.data.error : 'Unbekannter Fehler');
+    }
+  }).catch(function(e) {
+    if (callback) callback(false, e.message);
+  });
+}
+
+function undoLast() {
+  if (!sb) return;
+  sb.rpc('inventur_undo_last', { p_session_id: sessionId }).then(function(res) {
+    if (res.error) {
+      showFeedback('error', 'X', 'Fehler: ' + res.error.message);
+      soundError();
+      return;
+    }
+    if (res.data && res.data.success) {
+      scanCount--;
+      if (scanCount < 0) scanCount = 0;
+      document.getElementById('scanCount').textContent = scanCount;
+      updateStatsLine();
+      var log = document.getElementById('scanLog');
+      if (log.firstChild) log.removeChild(log.firstChild);
+      showFeedback('success', '&#8630;', 'Rueckgaengig');
+      soundLocationScanned();
+    } else {
+      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum Rueckgaengig machen');
+      soundError();
+    }
+  });
+}
+
+// ============================================================
+// PRODUCT LOOKUP
+// ============================================================
+function findProduct(code) {
+  var upper = code.toUpperCase().trim();
+  if (/^\d{13}$/.test(code)) {
+    for (var k in PRODUCTS) {
+      if (PRODUCTS[k].ean === code) return k;
     }
   }
-  // ASIN
-  if (upper.indexOf('B0') === 0 && PRODUCTS[upper]) return upper;
-  // Fallback
-  for (var a in PRODUCTS) {
-    if (PRODUCTS[a].ean === code) return a;
-    if (PRODUCTS[a].fnsku && PRODUCTS[a].fnsku.toUpperCase() === upper) return a;
-    if (PRODUCTS[a].sku && PRODUCTS[a].sku.toUpperCase() === upper) return a;
+  if (/^X0/i.test(upper)) {
+    for (var k in PRODUCTS) {
+      if (PRODUCTS[k].fnsku && PRODUCTS[k].fnsku.toUpperCase() === upper) return k;
+      if (PRODUCTS[k].sku && PRODUCTS[k].sku.toUpperCase() === upper) return k;
+    }
+  }
+  if (/^B0/i.test(upper) && PRODUCTS[upper]) return upper;
+  for (var k in PRODUCTS) {
+    if (PRODUCTS[k].ean === code) return k;
+    if (PRODUCTS[k].fnsku && PRODUCTS[k].fnsku.toUpperCase() === upper) return k;
+    if (PRODUCTS[k].sku && PRODUCTS[k].sku.toUpperCase() === upper) return k;
+    if (k.toUpperCase() === upper) return k;
   }
   return null;
 }
 
+// ============================================================
+// STEP MANAGEMENT
+// ============================================================
+function setStep(step) {
+  scanStep = step;
+  var s1 = document.getElementById('step1');
+  var s2 = document.getElementById('step2');
+  var s3 = document.getElementById('step3');
+  var scanLabel = document.getElementById('scanLabel');
+  var scanInput = document.getElementById('scanInput');
+
+  s1.className = 'step'; s2.className = 'step'; s3.className = 'step';
+
+  if (step === 1) {
+    s1.className = 'step active';
+    scanLabel.textContent = 'Regal-QR scannen';
+    scanInput.placeholder = 'QR-Code scannen...';
+    document.getElementById('productPanel').classList.add('hidden');
+    document.getElementById('notFoundCard').classList.add('hidden');
+    document.getElementById('undoPanel').classList.add('hidden');
+  } else if (step === 2) {
+    s1.className = 'step done'; s2.className = 'step active';
+    scanLabel.textContent = 'Produkt scannen (EAN/FNSKU)';
+    scanInput.placeholder = 'Barcode scannen...';
+    document.getElementById('productPanel').classList.add('hidden');
+    document.getElementById('notFoundCard').classList.add('hidden');
+    document.getElementById('undoPanel').classList.remove('hidden');
+  } else if (step === 3) {
+    s1.className = 'step done'; s2.className = 'step done'; s3.className = 'step active';
+    scanLabel.textContent = 'Menge eingeben und speichern';
+    document.getElementById('undoPanel').classList.remove('hidden');
+  }
+
+  scanInput.value = '';
+  if (step < 3) scanInput.focus();
+}
+
+// ============================================================
+// SCAN PROCESSING
+// ============================================================
 function processScan() {
   var input = document.getElementById('scanInput');
   var code = input.value.trim();
   if (!code) return;
-  var asin = findProduct(code);
-  if (asin && PRODUCTS[asin]) {
-    showProduct(asin);
-  } else {
-    document.getElementById('nfCode').textContent = code;
-    document.getElementById('notFoundCard').classList.add('show');
-    document.getElementById('productCard').classList.remove('show');
-    currentAsin = null;
+
+  var now = Date.now();
+  if (now - lastScanTime < 1500) return;
+  lastScanTime = now;
+
+  if (code.indexOf('LOC:') === 0) {
+    var loc = code.substring(4).trim();
+    setLocation(loc);
+    input.value = '';
+    return;
   }
-  input.value = '';
+
+  if (scanStep === 1) {
+    if (/^[A-F]-R\d{2}-E\d$/i.test(code) || /^RW-R\d{2}-E\d$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
+      setLocation(code.toUpperCase());
+      input.value = '';
+      return;
+    }
+    showFeedback('error', '?', 'Kein Regal-QR erkannt');
+    soundError();
+    input.value = '';
+    return;
+  }
+
+  if (scanStep === 2) {
+    var key = findProduct(code);
+    if (key && PRODUCTS[key]) {
+      showProduct(key, code);
+    } else {
+      document.getElementById('nfCode').textContent = code;
+      document.getElementById('notFoundCard').classList.remove('hidden');
+      document.getElementById('productPanel').classList.add('hidden');
+      currentEan = /^\d{13}$/.test(code) ? code : '';
+      currentAsin = /^B0/i.test(code) ? code.toUpperCase() : '';
+      currentProductName = 'Unbekannt (' + code + ')';
+      soundError();
+      showFeedback('error', '?', 'Produkt nicht gefunden');
+    }
+    input.value = '';
+    return;
+  }
 }
 
-function showProduct(asin) {
-  var p = PRODUCTS[asin];
-  currentAsin = asin;
+function setLocation(loc) {
+  currentLocation = loc;
+  var badge = document.getElementById('locBadge');
+  badge.classList.add('scanned');
+  document.getElementById('locName').textContent = loc;
+  document.getElementById('locDetail').textContent = getLocationLabel(loc);
+  soundLocationScanned();
+  showFeedback('success', '&#10003;', loc);
+  setStep(2);
+}
+
+function getLocationLabel(loc) {
+  var parts = loc.split('-');
+  if (parts.length === 3) {
+    var gang = parts[0];
+    var regal = parts[1].replace('R', 'Regal ');
+    var ebene = parts[2].replace('E', 'Ebene ');
+    if (gang === 'RW') return 'Rueckwand, ' + regal + ', ' + ebene;
+    return 'Gang ' + gang + ', ' + regal + ', ' + ebene;
+  }
+  var names = { 'BODEN': 'Bodenflaeche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  return names[loc] || loc;
+}
+
+function showProduct(key, scanCode) {
+  var p = PRODUCTS[key];
+  currentEan = p.ean || '';
+  currentAsin = p.asin || key;
+  currentProductName = p.title || '';
   currentQty = 1;
+
   document.getElementById('piTitle').textContent = p.title || '(kein Titel)';
-  document.getElementById('piAsin').textContent = asin;
   document.getElementById('piEan').textContent = p.ean || '-';
+  document.getElementById('piAsin').textContent = p.asin || key;
   document.getElementById('piFnsku').textContent = p.fnsku || '-';
   document.getElementById('piEk').textContent = p.ek ? p.ek.toFixed(2) + ' EUR' : '-';
   document.getElementById('qtyVal').textContent = '1';
-  document.getElementById('productCard').classList.add('show');
-  document.getElementById('notFoundCard').classList.remove('show');
-  // Vibration als Feedback
-  if (navigator.vibrate) navigator.vibrate(100);
+
+  document.getElementById('productPanel').classList.remove('hidden');
+  document.getElementById('notFoundCard').classList.add('hidden');
+
+  soundLocationScanned();
+  setStep(3);
 }
 
+// ============================================================
+// SAVE
+// ============================================================
 function saveCount() {
-  if (!currentAsin || !connected) return;
-  var location = document.getElementById('setupLocation').value;
-  var user = document.getElementById('setupName').value || 'Handy';
-  var timestamp = new Date().toISOString();
-  // An Supabase senden
-  sb.from('inventory_counts').upsert({
-    asin: currentAsin, qty: currentQty, location: location,
-    condition: 'neu', counted_by: user, scan_code: '', counted_at: timestamp
-  }, { onConflict: 'asin,location' }).then(function(res) {
-    if (res.error) { alert('Fehler: ' + res.error.message); return; }
-    // Scan-Log
-    sb.from('scan_log').insert({
-      asin: currentAsin, scan_code: '', qty: currentQty,
-      location: location, scanned_by: user
-    });
-  });
-  // Erfolg anzeigen
-  var msg = document.getElementById('successMsg');
-  msg.textContent = currentQty + 'x gespeichert!';
-  msg.classList.add('show');
-  setTimeout(function() { msg.classList.remove('show'); }, 3000);
-  // Log
-  scanCount++;
-  document.getElementById('scanCount').textContent = scanCount;
-  var log = document.getElementById('scanLog');
-  var title = (PRODUCTS[currentAsin].title || currentAsin).substring(0, 30);
-  var time = new Date().toLocaleTimeString('de-DE');
-  log.innerHTML = '<div class="log-item"><span><b>' + currentQty + 'x</b> ' + title + '</span><span class="log-time">' + time + '</span></div>' + log.innerHTML;
-  // Reset
-  document.getElementById('productCard').classList.remove('show');
-  currentAsin = null;
-  document.getElementById('scanInput').focus();
-  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-}
-
-function toggleCamera() {
-  var wrap = document.getElementById('cameraWrap');
-  var btn = document.getElementById('btnCamera');
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(function(t) { t.stop(); });
-    cameraStream = null;
-    wrap.classList.remove('show');
-    btn.textContent = 'Kamera öffnen';
+  if (!currentLocation) {
+    showFeedback('error', '!', 'Kein Regal gewaehlt');
+    soundError();
     return;
   }
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-  }).then(function(stream) {
-    cameraStream = stream;
-    document.getElementById('cameraVideo').srcObject = stream;
-    wrap.classList.add('show');
-    btn.textContent = 'Kamera schließen';
-    if (barcodeDetector) detectLoop();
-  }).catch(function(e) { alert('Kamera: ' + e.message); });
-}
 
-function detectLoop() {
-  if (!cameraStream || !barcodeDetector) return;
-  var video = document.getElementById('cameraVideo');
-  barcodeDetector.detect(video).then(function(codes) {
-    if (codes.length > 0) {
-      document.getElementById('scanInput').value = codes[0].rawValue;
-      processScan();
-      setTimeout(function() { if (cameraStream) requestAnimationFrame(detectLoop); }, 2000);
+  var qty = currentQty;
+  var loc = currentLocation;
+  var ean = currentEan;
+  var asin = currentAsin;
+  var name = currentProductName;
+
+  document.getElementById('btnSave').disabled = true;
+
+  saveToSupabase(loc, ean, asin, name, qty, function(success, error) {
+    document.getElementById('btnSave').disabled = false;
+
+    if (success) {
+      soundSuccess();
+      showFeedback('success', '&#10003;', qty + 'x gespeichert');
+      scanCount++;
+      document.getElementById('scanCount').textContent = scanCount;
+      updateStatsLine();
+      addLogEntry(loc, ean || asin || '?', name, qty);
+
+      document.getElementById('productPanel').classList.add('hidden');
+      document.getElementById('notFoundCard').classList.add('hidden');
+      currentEan = '';
+      currentAsin = '';
+      currentProductName = '';
+      currentQty = 1;
+      setStep(2);
     } else {
-      if (cameraStream) requestAnimationFrame(detectLoop);
+      soundError();
+      showFeedback('error', 'X', 'Fehler: ' + (error || ''));
     }
-  }).catch(function() {
-    if (cameraStream) requestAnimationFrame(detectLoop);
   });
 }
 
+function saveUnknown() {
+  currentQty = 1;
+  document.getElementById('qtyVal').textContent = '1';
+  document.getElementById('piTitle').textContent = currentProductName || 'Unbekanntes Produkt';
+  document.getElementById('piEan').textContent = currentEan || '-';
+  document.getElementById('piAsin').textContent = currentAsin || '-';
+  document.getElementById('piFnsku').textContent = '-';
+  document.getElementById('piEk').textContent = '-';
+
+  document.getElementById('productPanel').classList.remove('hidden');
+  document.getElementById('notFoundCard').classList.add('hidden');
+  setStep(3);
+}
+
+// ============================================================
+// LOG
+// ============================================================
+function addLogEntry(loc, code, name, qty) {
+  var log = document.getElementById('scanLog');
+  var time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  var shortName = (name || code || '?').substring(0, 25);
+  var div = document.createElement('div');
+  div.className = 'log-item';
+  div.innerHTML = '<span class="log-loc">' + loc + '</span>' +
+    '<span class="log-product">' + shortName + '</span>' +
+    '<span class="log-qty">' + qty + 'x</span>' +
+    '<span class="log-time">' + time + '</span>';
+  log.insertBefore(div, log.firstChild);
+}
+
+function updateStatsLine() {
+  document.getElementById('statsLine').textContent = scanCount + ' Scans | ' + currentLocation;
+}
+
+// ============================================================
+// CAMERA (html5-qrcode Library)
+// ============================================================
+function toggleCamera() {
+  var btn = document.getElementById('btnCamera');
+  var readerDiv = document.getElementById('qr-reader');
+
+  if (cameraActive) {
+    if (html5QrCode) {
+      html5QrCode.stop().then(function() {
+        html5QrCode.clear();
+        readerDiv.classList.add('hidden');
+        btn.textContent = 'Kamera oeffnen';
+        cameraActive = false;
+      }).catch(function() {
+        readerDiv.classList.add('hidden');
+        btn.textContent = 'Kamera oeffnen';
+        cameraActive = false;
+      });
+    }
+    return;
+  }
+
+  getAudioCtx();
+
+  readerDiv.classList.remove('hidden');
+  btn.textContent = 'Kamera schliessen';
+
+  html5QrCode = new Html5Qrcode('qr-reader');
+
+  var config = {
+    fps: 10,
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      var minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+      var size = Math.floor(minEdge * 0.7);
+      return { width: size, height: Math.floor(size * 0.6) };
+    },
+    aspectRatio: 1.0,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.UPC_A
+    ]
+  };
+
+  html5QrCode.start(
+    { facingMode: 'environment' },
+    config,
+    function onScanSuccess(decodedText) {
+      var now = Date.now();
+      if (now - lastScanTime < 2000) return;
+      lastScanTime = now;
+
+      document.getElementById('scanInput').value = decodedText;
+      processScan();
+    },
+    function onScanFailure() {
+      // Normaler Zustand wenn kein Code im Bild
+    }
+  ).then(function() {
+    cameraActive = true;
+  }).catch(function(err) {
+    readerDiv.classList.add('hidden');
+    btn.textContent = 'Kamera oeffnen';
+    showFeedback('error', 'X', 'Kamera: ' + err);
+    soundError();
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
 function init() {
-  // Lagerplätze befüllen
-  var sel = document.getElementById('setupLocation');
-  for (var i = 0; i < LOCATIONS.length; i++) {
-    sel.innerHTML += '<option value="' + LOCATIONS[i] + '">' + LOCATIONS[i] + '</option>';
-  }
-  // Gespeicherten Namen laden
+  var d = new Date();
+  sessionId = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
   var savedName = localStorage.getItem('inv_scanner_name') || '';
-  var savedLoc = localStorage.getItem('inv_scanner_loc') || '';
   if (savedName) document.getElementById('setupName').value = savedName;
-  if (savedLoc) document.getElementById('setupLocation').value = savedLoc;
-  // Barcode Detector
-  if ('BarcodeDetector' in window) {
-    barcodeDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'code_128', 'code_39'] });
-  }
-  // Events
+
   document.getElementById('btnStart').addEventListener('click', function() {
     var name = document.getElementById('setupName').value.trim();
-    var loc = document.getElementById('setupLocation').value;
     if (!name) { alert('Bitte Name eingeben!'); return; }
-    if (!loc) { alert('Bitte Lagerplatz wählen!'); return; }
+    workerName = name;
     localStorage.setItem('inv_scanner_name', name);
-    localStorage.setItem('inv_scanner_loc', loc);
-    document.getElementById('currentUser').textContent = name;
-    document.getElementById('currentLoc').textContent = loc;
+    document.getElementById('workerName').textContent = name;
     document.getElementById('setupView').classList.add('hidden');
     document.getElementById('scanView').classList.remove('hidden');
-    document.getElementById('scanInput').focus();
+    getAudioCtx();
+    setStep(1);
   });
+
   document.getElementById('scanInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') processScan();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      processScan();
+    }
   });
+
   document.getElementById('btnSave').addEventListener('click', saveCount);
+  document.getElementById('btnSaveUnknown').addEventListener('click', saveUnknown);
   document.getElementById('btnCamera').addEventListener('click', toggleCamera);
+  document.getElementById('btnUndo').addEventListener('click', undoLast);
+
   document.getElementById('btnPlus').addEventListener('click', function() {
     currentQty++;
     document.getElementById('qtyVal').textContent = currentQty;
@@ -359,14 +771,19 @@ function init() {
     if (currentQty > 1) currentQty--;
     document.getElementById('qtyVal').textContent = currentQty;
   });
+
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
-    document.getElementById('scanView').classList.add('hidden');
-    document.getElementById('setupView').classList.remove('hidden');
+    currentLocation = '';
+    document.getElementById('locBadge').classList.remove('scanned');
+    document.getElementById('locName').textContent = '- kein Regal -';
+    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal';
+    setStep(1);
   });
+
   initSupabase();
 }
 
-try { init(); } catch(e) { alert('Fehler: ' + e.message); }
+try { init(); } catch(e) { alert('Init-Fehler: ' + e.message); }
 </script>
 </body>
 </html>
