@@ -149,13 +149,13 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
 
   <!-- LOCATION BADGE -->
   <div class="loc-badge" id="locBadge">
-    <div class="loc-name" id="locName">\u2013 kein Regal \u2013</div>
-    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal oder w\u00e4hle unten aus</div>
+    <div class="loc-name" id="locName">– kein Regal –</div>
+    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal oder wähle unten aus</div>
   </div>
 
   <!-- LOCATION DROPDOWN (Alternative zum QR-Scan) -->
   <div class="panel panel-sm" id="locDropdownPanel">
-    <div class="panel-title" style="margin-bottom:6px">Lagerplatz manuell w\u00e4hlen</div>
+    <div class="panel-title" style="margin-bottom:6px">Lagerplatz manuell wählen</div>
     <div style="display:flex;gap:6px">
       <select id="selGang" style="flex:1;font-size:15px;padding:10px">
         <option value="">Gang</option>
@@ -165,7 +165,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
         <option value="D">Gang D</option>
         <option value="E">Gang E</option>
         <option value="F">Gang F</option>
-        <option value="RW">R\u00fcckwand</option>
+        <option value="RW">Rückwand</option>
         <option value="SONDER">Sonder</option>
       </select>
       <select id="selRegal" style="flex:1;font-size:15px;padding:10px" disabled>
@@ -184,7 +184,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
       <span style="font-size:12px;color:var(--text2)" id="workerName">-</span>
     </div>
     <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none" autocomplete="off">
-    <button class="btn btn-camera" id="btnCamera">Kamera \u00f6ffnen</button>
+    <button class="btn btn-camera" id="btnCamera">Kamera öffnen</button>
     <div id="qr-reader" class="hidden"></div>
   </div>
 
@@ -210,12 +210,12 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
     <div style="font-size:18px;font-weight:700;margin-bottom:6px">Nicht gefunden</div>
     <div id="nfCode" style="font-family:monospace;font-size:16px">-</div>
     <p style="font-size:12px;margin-top:8px;color:var(--text2)">Manuell als unbekanntes Produkt erfassen?</p>
-    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem z\u00e4hlen</button>
+    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem zählen</button>
   </div>
 
   <!-- UNDO -->
   <div class="hidden" id="undoPanel" style="margin-bottom:12px">
-    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan r\u00fcckg\u00e4ngig</button>
+    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan rückgängig</button>
   </div>
 
   <!-- LOG -->
@@ -256,7 +256,7 @@ var audioCtx = null;
 var lastScanTime = 0;
 
 // ============================================================
-// AUDIO FEEDBACK (Web Audio API \u2013 keine Dateien n\u00f6tig)
+// AUDIO FEEDBACK (Web Audio API – keine Dateien nötig)
 // ============================================================
 function getAudioCtx() {
   if (!audioCtx) {
@@ -278,7 +278,7 @@ function playTone(freq, duration, type, volume) {
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (duration || 0.2));
     osc.stop(ctx.currentTime + (duration || 0.2));
-  } catch(e) { /* Audio nicht verf\u00fcgbar */ }
+  } catch(e) { /* Audio nicht verfügbar */ }
 }
 
 function soundSuccess() {
@@ -333,7 +333,7 @@ function loadProducts() {
   if (!sb) return;
   sb.rpc('fetch_billbee_products', { p_page: 1, p_page_size: 250 }).then(function(res) {
     if (res.error) {
-      console.log('Billbee RPC nicht verf\u00fcgbar, nutze lokale Daten');
+      console.log('Billbee RPC nicht verfügbar, nutze lokale Daten');
       return;
     }
     var data = res.data;
@@ -359,7 +359,7 @@ function loadProducts() {
         var fnskuMatch = sku.match(/(X0[A-Z0-9]{8})/i);
         if (fnskuMatch) fnsku = fnskuMatch[1].toUpperCase();
         if (!ean && sku) {
-          var eanMatch = sku.match(/(\\d{13})/);
+          var eanMatch = sku.match(/(\d{13})/);
           if (eanMatch) ean = eanMatch[1];
         }
         if (bp.Sources && bp.Sources.length) {
@@ -368,7 +368,7 @@ function loadProducts() {
             if (!asin && src.ExternalId && /^B0/i.test(src.ExternalId)) asin = src.ExternalId.toUpperCase();
             if (!fnsku && src.Custom && src.Custom.FNSKU) fnsku = src.Custom.FNSKU;
             if (!ean && src.Custom && src.Custom.EAN) ean = src.Custom.EAN;
-            if (!ean && src.ExternalId && /^\\d{13}$/.test(src.ExternalId)) ean = src.ExternalId;
+            if (!ean && src.ExternalId && /^\d{13}$/.test(src.ExternalId)) ean = src.ExternalId;
           }
         }
         var key = asin || ean || ('BB_' + bp.BillbeeId);
@@ -429,10 +429,10 @@ function undoLast() {
       updateStatsLine();
       var log = document.getElementById('scanLog');
       if (log.firstChild) log.removeChild(log.firstChild);
-      showFeedback('success', '&#8630;', 'R\u00fcckg\u00e4ngig');
+      showFeedback('success', '&#8630;', 'Rückgängig');
       soundLocationScanned();
     } else {
-      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum R\u00fcckg\u00e4ngig machen');
+      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum Rückgängig machen');
       soundError();
     }
   });
@@ -443,7 +443,7 @@ function undoLast() {
 // ============================================================
 function findProduct(code) {
   var upper = code.toUpperCase().trim();
-  if (/^\\d{13}$/.test(code)) {
+  if (/^\d{13}$/.test(code)) {
     for (var k in PRODUCTS) {
       if (PRODUCTS[k].ean === code) return k;
     }
@@ -507,7 +507,7 @@ function processScan() {
   var now = Date.now();
   if (now - lastScanTime < 1500) return;
   lastScanTime = now;
-  // QR-Code f\u00fcr Lagerplatz?
+  // QR-Code für Lagerplatz?
   if (code.indexOf('LOC:') === 0) {
     var loc = code.substring(4).trim();
     setLocation(loc);
@@ -515,7 +515,7 @@ function processScan() {
     return;
   }
   if (scanStep === 1) {
-    if (/^[A-F]-R\\d{2}-E\\d{1,2}$/i.test(code) || /^RW-R\\d{2}-E\\d{1,2}$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
+    if (/^[A-F]-R\d{2}-E\d{1,2}$/i.test(code) || /^RW-R\d{2}-E\d{1,2}$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
       setLocation(code.toUpperCase());
       input.value = '';
       return;
@@ -533,7 +533,7 @@ function processScan() {
       document.getElementById('nfCode').textContent = code;
       document.getElementById('notFoundCard').classList.remove('hidden');
       document.getElementById('productPanel').classList.add('hidden');
-      currentEan = /^\\d{13}$/.test(code) ? code : '';
+      currentEan = /^\d{13}$/.test(code) ? code : '';
       currentAsin = /^B0/i.test(code) ? code.toUpperCase() : '';
       currentProductName = 'Unbekannt (' + code + ')';
       soundError();
@@ -560,10 +560,10 @@ function getLocationLabel(loc) {
     var gang = parts[0];
     var regal = parts[1].replace('R', 'Regal ');
     var ebene = parts[2].replace('E', 'Ebene ');
-    if (gang === 'RW') return 'R\u00fcckwand, ' + regal + ', ' + ebene;
+    if (gang === 'RW') return 'Rückwand, ' + regal + ', ' + ebene;
     return 'Gang ' + gang + ', ' + regal + ', ' + ebene;
   }
-  var names = { 'BODEN': 'Bodenfl\u00e4che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var names = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   return names[loc] || loc;
 }
 
@@ -590,7 +590,7 @@ function showProduct(key, scanCode) {
 // ============================================================
 function saveCount() {
   if (!currentLocation) {
-    showFeedback('error', '!', 'Kein Regal gew\u00e4hlt');
+    showFeedback('error', '!', 'Kein Regal gewählt');
     soundError();
     return;
   }
@@ -609,14 +609,14 @@ function saveCount() {
       document.getElementById('scanCount').textContent = scanCount;
       updateStatsLine();
       addLogEntry(loc, ean || asin || '?', name, qty);
-      // Reset f\u00fcr n\u00e4chstes Produkt
+      // Reset für nächstes Produkt
       document.getElementById('productPanel').classList.add('hidden');
       document.getElementById('notFoundCard').classList.add('hidden');
       currentEan = '';
       currentAsin = '';
       currentProductName = '';
       currentQty = 1;
-      setStep(2); // Zur\u00fcck zu Produkt scannen (gleiches Regal)
+      setStep(2); // Zurück zu Produkt scannen (gleiches Regal)
     } else {
       soundError();
       showFeedback('error', 'X', 'Fehler: ' + (error || ''));
@@ -657,7 +657,7 @@ function updateStatsLine() {
 }
 
 // ============================================================
-// CAMERA (html5-qrcode Library \u2013 funktioniert auf allen Ger\u00e4ten)
+// CAMERA (html5-qrcode Library – funktioniert auf allen Geräten)
 // ============================================================
 function toggleCamera() {
   var btn = document.getElementById('btnCamera');
@@ -667,11 +667,11 @@ function toggleCamera() {
       html5QrCode.stop().then(function() {
         html5QrCode.clear();
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera \u00f6ffnen';
+        btn.textContent = 'Kamera öffnen';
         cameraActive = false;
       }).catch(function() {
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera \u00f6ffnen';
+        btn.textContent = 'Kamera öffnen';
         cameraActive = false;
       });
     }
@@ -679,7 +679,7 @@ function toggleCamera() {
   }
   getAudioCtx();
   readerDiv.classList.remove('hidden');
-  btn.textContent = 'Kamera schlie\u00dfen';
+  btn.textContent = 'Kamera schließen';
   html5QrCode = new Html5Qrcode('qr-reader');
   var config = {
     fps: 10,
@@ -713,7 +713,7 @@ function toggleCamera() {
     cameraActive = true;
   }).catch(function(err) {
     readerDiv.classList.add('hidden');
-    btn.textContent = 'Kamera \u00f6ffnen';
+    btn.textContent = 'Kamera öffnen';
     showFeedback('error', 'X', 'Kamera: ' + err);
     soundError();
   });
@@ -764,8 +764,8 @@ function init() {
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
     currentLocation = '';
     document.getElementById('locBadge').classList.remove('scanned');
-    document.getElementById('locName').textContent = '\u2013 kein Regal \u2013';
-    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder w\u00e4hle unten aus';
+    document.getElementById('locName').textContent = '– kein Regal –';
+    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder wähle unten aus';
     document.getElementById('selGang').value = '';
     document.getElementById('selRegal').innerHTML = '<option value="">Regal</option>';
     document.getElementById('selRegal').disabled = true;
@@ -774,11 +774,11 @@ function init() {
     setStep(1);
   });
 
-  // ===== DROPDOWN: Gang \u2192 Regal \u2192 Ebene =====
+  // ===== DROPDOWN: Gang → Regal → Ebene =====
   var GANG_REGALE = { 'A': 5, 'B': 5, 'C': 5, 'D': 6, 'E': 6, 'F': 6 };
   var RW_REGALE_COUNT = 2;
   var SONDER_PLAETZE = ['BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT'];
-  var SONDER_NAMEN = { 'BODEN': 'Bodenfl\u00e4che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var SONDER_NAMEN = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   var DEFAULT_EBENEN = 10;
 
   document.getElementById('selGang').addEventListener('change', function() {
