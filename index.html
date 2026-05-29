@@ -38,7 +38,6 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
 .btn-undo { background: var(--orange); color: #000; font-size: 14px; padding: 10px; }
 .btn-start { background: var(--accent2); color: #fff; }
 .btn-sm { width: auto; padding: 8px 16px; margin: 0; font-size: 13px; }
-
 /* STEP INDICATOR */
 .steps { display: flex; gap: 4px; margin-bottom: 14px; }
 .step { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--text2); border: 2px solid transparent; transition: all 0.2s; }
@@ -150,18 +149,42 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
 
   <!-- LOCATION BADGE -->
   <div class="loc-badge" id="locBadge">
-    <div class="loc-name" id="locName">– kein Regal –</div>
-    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal</div>
+    <div class="loc-name" id="locName">\u2013 kein Regal \u2013</div>
+    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal oder w\u00e4hle unten aus</div>
+  </div>
+
+  <!-- LOCATION DROPDOWN (Alternative zum QR-Scan) -->
+  <div class="panel panel-sm" id="locDropdownPanel">
+    <div class="panel-title" style="margin-bottom:6px">Lagerplatz manuell w\u00e4hlen</div>
+    <div style="display:flex;gap:6px">
+      <select id="selGang" style="flex:1;font-size:15px;padding:10px">
+        <option value="">Gang</option>
+        <option value="A">Gang A</option>
+        <option value="B">Gang B</option>
+        <option value="C">Gang C</option>
+        <option value="D">Gang D</option>
+        <option value="E">Gang E</option>
+        <option value="F">Gang F</option>
+        <option value="RW">R\u00fcckwand</option>
+        <option value="SONDER">Sonder</option>
+      </select>
+      <select id="selRegal" style="flex:1;font-size:15px;padding:10px" disabled>
+        <option value="">Regal</option>
+      </select>
+      <select id="selEbene" style="flex:1;font-size:15px;padding:10px" disabled>
+        <option value="">Ebene</option>
+      </select>
+    </div>
   </div>
 
   <!-- SCAN INPUT + CAMERA -->
   <div class="panel panel-sm">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div class="panel-title" style="margin:0" id="scanLabel">Regal-QR scannen</div>
+      <div class="panel-title" style="margin:0" id="scanLabel">Regal-QR scannen / EAN</div>
       <span style="font-size:12px;color:var(--text2)" id="workerName">-</span>
     </div>
     <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none" autocomplete="off">
-    <button class="btn btn-camera" id="btnCamera">Kamera oeffnen</button>
+    <button class="btn btn-camera" id="btnCamera">Kamera \u00f6ffnen</button>
     <div id="qr-reader" class="hidden"></div>
   </div>
 
@@ -187,12 +210,12 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
     <div style="font-size:18px;font-weight:700;margin-bottom:6px">Nicht gefunden</div>
     <div id="nfCode" style="font-family:monospace;font-size:16px">-</div>
     <p style="font-size:12px;margin-top:8px;color:var(--text2)">Manuell als unbekanntes Produkt erfassen?</p>
-    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem zaehlen</button>
+    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem z\u00e4hlen</button>
   </div>
 
   <!-- UNDO -->
   <div class="hidden" id="undoPanel" style="margin-bottom:12px">
-    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan rueckgaengig</button>
+    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan r\u00fcckg\u00e4ngig</button>
   </div>
 
   <!-- LOG -->
@@ -233,7 +256,7 @@ var audioCtx = null;
 var lastScanTime = 0;
 
 // ============================================================
-// AUDIO FEEDBACK (Web Audio API)
+// AUDIO FEEDBACK (Web Audio API \u2013 keine Dateien n\u00f6tig)
 // ============================================================
 function getAudioCtx() {
   if (!audioCtx) {
@@ -255,7 +278,7 @@ function playTone(freq, duration, type, volume) {
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (duration || 0.2));
     osc.stop(ctx.currentTime + (duration || 0.2));
-  } catch(e) { /* Audio nicht verfuegbar */ }
+  } catch(e) { /* Audio nicht verf\u00fcgbar */ }
 }
 
 function soundSuccess() {
@@ -273,7 +296,6 @@ function soundLocationScanned() {
   playTone(660, 0.1, 'sine', 0.25);
   setTimeout(function() { playTone(880, 0.15, 'sine', 0.25); }, 120);
 }
-
 // ============================================================
 // FEEDBACK OVERLAY
 // ============================================================
@@ -311,7 +333,7 @@ function loadProducts() {
   if (!sb) return;
   sb.rpc('fetch_billbee_products', { p_page: 1, p_page_size: 250 }).then(function(res) {
     if (res.error) {
-      console.log('Billbee RPC nicht verfuegbar, nutze lokale Daten');
+      console.log('Billbee RPC nicht verf\u00fcgbar, nutze lokale Daten');
       return;
     }
     var data = res.data;
@@ -337,7 +359,7 @@ function loadProducts() {
         var fnskuMatch = sku.match(/(X0[A-Z0-9]{8})/i);
         if (fnskuMatch) fnsku = fnskuMatch[1].toUpperCase();
         if (!ean && sku) {
-          var eanMatch = sku.match(/(\d{13})/);
+          var eanMatch = sku.match(/(\\d{13})/);
           if (eanMatch) ean = eanMatch[1];
         }
         if (bp.Sources && bp.Sources.length) {
@@ -346,20 +368,15 @@ function loadProducts() {
             if (!asin && src.ExternalId && /^B0/i.test(src.ExternalId)) asin = src.ExternalId.toUpperCase();
             if (!fnsku && src.Custom && src.Custom.FNSKU) fnsku = src.Custom.FNSKU;
             if (!ean && src.Custom && src.Custom.EAN) ean = src.Custom.EAN;
-            if (!ean && src.ExternalId && /^\d{13}$/.test(src.ExternalId)) ean = src.ExternalId;
+            if (!ean && src.ExternalId && /^\\d{13}$/.test(src.ExternalId)) ean = src.ExternalId;
           }
         }
         var key = asin || ean || ('BB_' + bp.BillbeeId);
         var ekNetto = 0;
         if (bp.Net) ekNetto = parseFloat(bp.Net) || 0;
         PRODUCTS[key] = {
-          asin: asin,
-          ean: ean,
-          fnsku: fnsku,
-          sku: sku,
-          title: title,
-          ek: ekNetto,
-          billbeeId: bp.BillbeeId
+          asin: asin, ean: ean, fnsku: fnsku, sku: sku,
+          title: title, ek: ekNetto, billbeeId: bp.BillbeeId
         };
       }
       var count = Object.keys(PRODUCTS).length;
@@ -367,7 +384,6 @@ function loadProducts() {
     }
   });
 }
-
 // ============================================================
 // SAVE COUNT TO SUPABASE
 // ============================================================
@@ -413,10 +429,10 @@ function undoLast() {
       updateStatsLine();
       var log = document.getElementById('scanLog');
       if (log.firstChild) log.removeChild(log.firstChild);
-      showFeedback('success', '&#8630;', 'Rueckgaengig');
+      showFeedback('success', '&#8630;', 'R\u00fcckg\u00e4ngig');
       soundLocationScanned();
     } else {
-      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum Rueckgaengig machen');
+      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum R\u00fcckg\u00e4ngig machen');
       soundError();
     }
   });
@@ -427,7 +443,7 @@ function undoLast() {
 // ============================================================
 function findProduct(code) {
   var upper = code.toUpperCase().trim();
-  if (/^\d{13}$/.test(code)) {
+  if (/^\\d{13}$/.test(code)) {
     for (var k in PRODUCTS) {
       if (PRODUCTS[k].ean === code) return k;
     }
@@ -447,7 +463,6 @@ function findProduct(code) {
   }
   return null;
 }
-
 // ============================================================
 // STEP MANAGEMENT
 // ============================================================
@@ -458,9 +473,7 @@ function setStep(step) {
   var s3 = document.getElementById('step3');
   var scanLabel = document.getElementById('scanLabel');
   var scanInput = document.getElementById('scanInput');
-
   s1.className = 'step'; s2.className = 'step'; s3.className = 'step';
-
   if (step === 1) {
     s1.className = 'step active';
     scanLabel.textContent = 'Regal-QR scannen';
@@ -480,7 +493,6 @@ function setStep(step) {
     scanLabel.textContent = 'Menge eingeben und speichern';
     document.getElementById('undoPanel').classList.remove('hidden');
   }
-
   scanInput.value = '';
   if (step < 3) scanInput.focus();
 }
@@ -492,20 +504,18 @@ function processScan() {
   var input = document.getElementById('scanInput');
   var code = input.value.trim();
   if (!code) return;
-
   var now = Date.now();
   if (now - lastScanTime < 1500) return;
   lastScanTime = now;
-
+  // QR-Code f\u00fcr Lagerplatz?
   if (code.indexOf('LOC:') === 0) {
     var loc = code.substring(4).trim();
     setLocation(loc);
     input.value = '';
     return;
   }
-
   if (scanStep === 1) {
-    if (/^[A-F]-R\d{2}-E\d$/i.test(code) || /^RW-R\d{2}-E\d$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
+    if (/^[A-F]-R\\d{2}-E\\d{1,2}$/i.test(code) || /^RW-R\\d{2}-E\\d{1,2}$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
       setLocation(code.toUpperCase());
       input.value = '';
       return;
@@ -515,7 +525,6 @@ function processScan() {
     input.value = '';
     return;
   }
-
   if (scanStep === 2) {
     var key = findProduct(code);
     if (key && PRODUCTS[key]) {
@@ -524,7 +533,7 @@ function processScan() {
       document.getElementById('nfCode').textContent = code;
       document.getElementById('notFoundCard').classList.remove('hidden');
       document.getElementById('productPanel').classList.add('hidden');
-      currentEan = /^\d{13}$/.test(code) ? code : '';
+      currentEan = /^\\d{13}$/.test(code) ? code : '';
       currentAsin = /^B0/i.test(code) ? code.toUpperCase() : '';
       currentProductName = 'Unbekannt (' + code + ')';
       soundError();
@@ -534,7 +543,6 @@ function processScan() {
     return;
   }
 }
-
 function setLocation(loc) {
   currentLocation = loc;
   var badge = document.getElementById('locBadge');
@@ -552,10 +560,10 @@ function getLocationLabel(loc) {
     var gang = parts[0];
     var regal = parts[1].replace('R', 'Regal ');
     var ebene = parts[2].replace('E', 'Ebene ');
-    if (gang === 'RW') return 'Rueckwand, ' + regal + ', ' + ebene;
+    if (gang === 'RW') return 'R\u00fcckwand, ' + regal + ', ' + ebene;
     return 'Gang ' + gang + ', ' + regal + ', ' + ebene;
   }
-  var names = { 'BODEN': 'Bodenflaeche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var names = { 'BODEN': 'Bodenfl\u00e4che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   return names[loc] || loc;
 }
 
@@ -565,17 +573,14 @@ function showProduct(key, scanCode) {
   currentAsin = p.asin || key;
   currentProductName = p.title || '';
   currentQty = 1;
-
   document.getElementById('piTitle').textContent = p.title || '(kein Titel)';
   document.getElementById('piEan').textContent = p.ean || '-';
   document.getElementById('piAsin').textContent = p.asin || key;
   document.getElementById('piFnsku').textContent = p.fnsku || '-';
   document.getElementById('piEk').textContent = p.ek ? p.ek.toFixed(2) + ' EUR' : '-';
   document.getElementById('qtyVal').textContent = '1';
-
   document.getElementById('productPanel').classList.remove('hidden');
   document.getElementById('notFoundCard').classList.add('hidden');
-
   soundLocationScanned();
   setStep(3);
 }
@@ -585,22 +590,18 @@ function showProduct(key, scanCode) {
 // ============================================================
 function saveCount() {
   if (!currentLocation) {
-    showFeedback('error', '!', 'Kein Regal gewaehlt');
+    showFeedback('error', '!', 'Kein Regal gew\u00e4hlt');
     soundError();
     return;
   }
-
   var qty = currentQty;
   var loc = currentLocation;
   var ean = currentEan;
   var asin = currentAsin;
   var name = currentProductName;
-
   document.getElementById('btnSave').disabled = true;
-
   saveToSupabase(loc, ean, asin, name, qty, function(success, error) {
     document.getElementById('btnSave').disabled = false;
-
     if (success) {
       soundSuccess();
       showFeedback('success', '&#10003;', qty + 'x gespeichert');
@@ -608,14 +609,14 @@ function saveCount() {
       document.getElementById('scanCount').textContent = scanCount;
       updateStatsLine();
       addLogEntry(loc, ean || asin || '?', name, qty);
-
+      // Reset f\u00fcr n\u00e4chstes Produkt
       document.getElementById('productPanel').classList.add('hidden');
       document.getElementById('notFoundCard').classList.add('hidden');
       currentEan = '';
       currentAsin = '';
       currentProductName = '';
       currentQty = 1;
-      setStep(2);
+      setStep(2); // Zur\u00fcck zu Produkt scannen (gleiches Regal)
     } else {
       soundError();
       showFeedback('error', 'X', 'Fehler: ' + (error || ''));
@@ -631,12 +632,10 @@ function saveUnknown() {
   document.getElementById('piAsin').textContent = currentAsin || '-';
   document.getElementById('piFnsku').textContent = '-';
   document.getElementById('piEk').textContent = '-';
-
   document.getElementById('productPanel').classList.remove('hidden');
   document.getElementById('notFoundCard').classList.add('hidden');
   setStep(3);
 }
-
 // ============================================================
 // LOG
 // ============================================================
@@ -658,35 +657,30 @@ function updateStatsLine() {
 }
 
 // ============================================================
-// CAMERA (html5-qrcode Library)
+// CAMERA (html5-qrcode Library \u2013 funktioniert auf allen Ger\u00e4ten)
 // ============================================================
 function toggleCamera() {
   var btn = document.getElementById('btnCamera');
   var readerDiv = document.getElementById('qr-reader');
-
   if (cameraActive) {
     if (html5QrCode) {
       html5QrCode.stop().then(function() {
         html5QrCode.clear();
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera oeffnen';
+        btn.textContent = 'Kamera \u00f6ffnen';
         cameraActive = false;
       }).catch(function() {
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera oeffnen';
+        btn.textContent = 'Kamera \u00f6ffnen';
         cameraActive = false;
       });
     }
     return;
   }
-
   getAudioCtx();
-
   readerDiv.classList.remove('hidden');
-  btn.textContent = 'Kamera schliessen';
-
+  btn.textContent = 'Kamera schlie\u00dfen';
   html5QrCode = new Html5Qrcode('qr-reader');
-
   var config = {
     fps: 10,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -704,7 +698,6 @@ function toggleCamera() {
       Html5QrcodeSupportedFormats.UPC_A
     ]
   };
-
   html5QrCode.start(
     { facingMode: 'environment' },
     config,
@@ -712,33 +705,29 @@ function toggleCamera() {
       var now = Date.now();
       if (now - lastScanTime < 2000) return;
       lastScanTime = now;
-
       document.getElementById('scanInput').value = decodedText;
       processScan();
     },
-    function onScanFailure() {
-      // Normaler Zustand wenn kein Code im Bild
-    }
+    function onScanFailure() {}
   ).then(function() {
     cameraActive = true;
   }).catch(function(err) {
     readerDiv.classList.add('hidden');
-    btn.textContent = 'Kamera oeffnen';
+    btn.textContent = 'Kamera \u00f6ffnen';
     showFeedback('error', 'X', 'Kamera: ' + err);
     soundError();
   });
 }
-
 // ============================================================
 // INIT
 // ============================================================
 function init() {
   var d = new Date();
   sessionId = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-
   var savedName = localStorage.getItem('inv_scanner_name') || '';
   if (savedName) document.getElementById('setupName').value = savedName;
 
+  // ===== EVENTS =====
   document.getElementById('btnStart').addEventListener('click', function() {
     var name = document.getElementById('setupName').value.trim();
     if (!name) { alert('Bitte Name eingeben!'); return; }
@@ -775,15 +764,80 @@ function init() {
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
     currentLocation = '';
     document.getElementById('locBadge').classList.remove('scanned');
-    document.getElementById('locName').textContent = '- kein Regal -';
-    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal';
+    document.getElementById('locName').textContent = '\u2013 kein Regal \u2013';
+    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder w\u00e4hle unten aus';
+    document.getElementById('selGang').value = '';
+    document.getElementById('selRegal').innerHTML = '<option value="">Regal</option>';
+    document.getElementById('selRegal').disabled = true;
+    document.getElementById('selEbene').innerHTML = '<option value="">Ebene</option>';
+    document.getElementById('selEbene').disabled = true;
     setStep(1);
+  });
+
+  // ===== DROPDOWN: Gang \u2192 Regal \u2192 Ebene =====
+  var GANG_REGALE = { 'A': 5, 'B': 5, 'C': 5, 'D': 6, 'E': 6, 'F': 6 };
+  var RW_REGALE_COUNT = 2;
+  var SONDER_PLAETZE = ['BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT'];
+  var SONDER_NAMEN = { 'BODEN': 'Bodenfl\u00e4che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var DEFAULT_EBENEN = 10;
+
+  document.getElementById('selGang').addEventListener('change', function() {
+    var gang = this.value;
+    var selRegal = document.getElementById('selRegal');
+    var selEbene = document.getElementById('selEbene');
+    selRegal.innerHTML = '<option value="">Regal</option>';
+    selEbene.innerHTML = '<option value="">Ebene</option>';
+    selEbene.disabled = true;
+    if (!gang) { selRegal.disabled = true; return; }
+    if (gang === 'SONDER') {
+      for (var i = 0; i < SONDER_PLAETZE.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = SONDER_PLAETZE[i];
+        opt.textContent = SONDER_NAMEN[SONDER_PLAETZE[i]] || SONDER_PLAETZE[i];
+        selRegal.appendChild(opt);
+      }
+      selRegal.disabled = false;
+      return;
+    }
+    var regale = (gang === 'RW') ? RW_REGALE_COUNT : (GANG_REGALE[gang] || 5);
+    for (var r = 1; r <= regale; r++) {
+      var opt = document.createElement('option');
+      opt.value = 'R' + String(r).padStart(2, '0');
+      opt.textContent = 'Regal ' + String(r).padStart(2, '0');
+      selRegal.appendChild(opt);
+    }
+    selRegal.disabled = false;
+  });
+
+  document.getElementById('selRegal').addEventListener('change', function() {
+    var gang = document.getElementById('selGang').value;
+    var regal = this.value;
+    var selEbene = document.getElementById('selEbene');
+    selEbene.innerHTML = '<option value="">Ebene</option>';
+    if (!regal) { selEbene.disabled = true; return; }
+    if (gang === 'SONDER') { setLocation(regal); return; }
+    for (var e = 1; e <= DEFAULT_EBENEN; e++) {
+      var opt = document.createElement('option');
+      opt.value = 'E' + e;
+      opt.textContent = 'Ebene ' + e;
+      selEbene.appendChild(opt);
+    }
+    selEbene.disabled = false;
+  });
+
+  document.getElementById('selEbene').addEventListener('change', function() {
+    var gang = document.getElementById('selGang').value;
+    var regal = document.getElementById('selRegal').value;
+    var ebene = this.value;
+    if (!gang || !regal || !ebene) return;
+    var loc = gang + '-' + regal + '-' + ebene;
+    setLocation(loc);
   });
 
   initSupabase();
 }
 
 try { init(); } catch(e) { alert('Init-Fehler: ' + e.message); }
-</script>
+<\/script>
 </body>
 </html>
