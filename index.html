@@ -184,8 +184,12 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
       <div class="panel-title" style="margin:0" id="scanLabel">Regal-QR scannen / EAN</div>
       <span style="font-size:12px;color:var(--text2)" id="workerName">-</span>
     </div>
-    <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none" autocomplete="off">
-    <button class="btn btn-camera" id="btnCamera">Kamera &#xf6;ffnen</button>
+    <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus autocomplete="off"
+           onkeydown="if(event.key==='Enter'){event.preventDefault();processScan();}">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="processScan()" class="btn btn-save" style="flex:1;margin:0;font-size:16px;padding:12px">Verarbeiten</button>
+      <button class="btn btn-camera" id="btnCamera" style="flex:1;margin:0">Kamera</button>
+    </div>
     <div id="qr-reader" class="hidden"></div>
   </div>
 
@@ -493,7 +497,7 @@ function processScan() {
   if (!code) return;
 
   var now = Date.now();
-  if (now - lastScanTime < 1500) return;
+  if (now - lastScanTime < 500) return;
   lastScanTime = now;
 
   // QR-Code f&#xfc;r Lagerplatz? (Format: LOC:A-R01-F3)
@@ -699,7 +703,7 @@ function toggleCamera() {
     config,
     function onScanSuccess(decodedText) {
       var now = Date.now();
-      if (now - lastScanTime < 2000) return;
+      if (now - lastScanTime < 800) return;
       lastScanTime = now;
       document.getElementById('scanInput').value = decodedText;
       processScan();
@@ -737,9 +741,47 @@ function init() {
     setStep(1);
   });
 
-  document.getElementById('scanInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); processScan(); }
+  // Enter/Tab ODER automatische Barcode-Scanner-Erkennung
+  var scanAutoTimer = null;
+  var scanEl = document.getElementById('scanInput');
+  scanEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); clearTimeout(scanAutoTimer); processScan(); }
   });
+  function scheduleScanCheck() {
+    clearTimeout(scanAutoTimer);
+    var val = scanEl.value.trim();
+    if (val.length >= 8) {
+      scanAutoTimer = setTimeout(function() {
+        if (scanEl.value.trim().length >= 8) processScan();
+      }, 300);
+    }
+  }
+  scanEl.addEventListener('input', scheduleScanCheck);
+  scanEl.addEventListener('keyup', scheduleScanCheck);
+  scanEl.addEventListener('change', function() { clearTimeout(scanAutoTimer); if (this.value.trim().length >= 8) processScan(); });
+  scanEl.addEventListener('paste', function() {
+    var el = this;
+    clearTimeout(scanAutoTimer);
+    setTimeout(function() { if (el.value.trim().length >= 8) processScan(); }, 50);
+  });
+
+  // Polling-Timer: Prüft alle 400ms ob etwas im Feld steht
+  // Funktioniert IMMER – egal wie der Scanner die Daten eingibt
+  var lastPolledValue = '';
+  setInterval(function() {
+    var val = scanEl.value.trim();
+    if (val.length >= 4 && val !== lastPolledValue) {
+      lastPolledValue = val;
+      setTimeout(function() {
+        var current = scanEl.value.trim();
+        if (current === lastPolledValue && current.length >= 4) {
+          processScan();
+        }
+      }, 600);
+    } else if (val.length === 0) {
+      lastPolledValue = '';
+    }
+  }, 400);
 
   document.getElementById('btnSave').addEventListener('click', saveCount);
   document.getElementById('btnSaveUnknown').addEventListener('click', saveUnknown);
@@ -785,53 +827,4 @@ function init() {
     if (!gang) { selRegal.disabled = true; return; }
     if (gang === 'SONDER') {
       for (var i = 0; i < SONDER_PLAETZE.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = SONDER_PLAETZE[i];
-        opt.textContent = SONDER_NAMEN[SONDER_PLAETZE[i]] || SONDER_PLAETZE[i];
-        selRegal.appendChild(opt);
-      }
-      selRegal.disabled = false;
-      return;
-    }
-    var regale = (gang === 'RW') ? RW_REGALE_COUNT : (GANG_REGALE[gang] || 5);
-    for (var r = 1; r <= regale; r++) {
-      var opt = document.createElement('option');
-      opt.value = 'R' + String(r).padStart(2, '0');
-      opt.textContent = 'Regal ' + String(r).padStart(2, '0');
-      selRegal.appendChild(opt);
-    }
-    selRegal.disabled = false;
-  });
-
-  document.getElementById('selRegal').addEventListener('change', function() {
-    var gang = document.getElementById('selGang').value;
-    var regal = this.value;
-    var selFach = document.getElementById('selFach');
-    selFach.innerHTML = '<option value="">Fach</option>';
-    if (!regal) { selFach.disabled = true; return; }
-    if (gang === 'SONDER') { setLocation(regal); return; }
-    for (var f = 1; f <= DEFAULT_FACHBOEDEN; f++) {
-      var opt = document.createElement('option');
-      opt.value = 'F' + f;
-      opt.textContent = 'Fach ' + f;
-      selFach.appendChild(opt);
-    }
-    selFach.disabled = false;
-  });
-
-  document.getElementById('selFach').addEventListener('change', function() {
-    var gang = document.getElementById('selGang').value;
-    var regal = document.getElementById('selRegal').value;
-    var fach = this.value;
-    if (!gang || !regal || !fach) return;
-    var loc = gang + '-' + regal + '-' + fach;
-    setLocation(loc);
-  });
-
-  initSupabase();
-}
-
-try { init(); } catch(e) { alert('Init-Fehler: ' + e.message); }
-</script>
-</body>
-</html>
+       
