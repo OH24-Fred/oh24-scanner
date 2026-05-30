@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Inventur Scanner – OnlineHandel24</title>
+<title>Inventur Scanner &#x2013; OnlineHandel24</title>
 <style>
 :root {
   --bg: #1a1a2e; --bg2: #16213e; --bg3: #0f3460;
@@ -38,6 +38,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
 .btn-undo { background: var(--orange); color: #000; font-size: 14px; padding: 10px; }
 .btn-start { background: var(--accent2); color: #fff; }
 .btn-sm { width: auto; padding: 8px 16px; margin: 0; font-size: 13px; }
+
 /* STEP INDICATOR */
 .steps { display: flex; gap: 4px; margin-bottom: 14px; }
 .step { flex: 1; text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--bg); color: var(--text2); border: 2px solid transparent; transition: all 0.2s; }
@@ -149,13 +150,13 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
 
   <!-- LOCATION BADGE -->
   <div class="loc-badge" id="locBadge">
-    <div class="loc-name" id="locName">– kein Regal –</div>
-    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal oder wähle unten aus</div>
+    <div class="loc-name" id="locName">&#x2013; kein Regal &#x2013;</div>
+    <div class="loc-detail" id="locDetail">Scanne den QR-Code am Regal oder w&#xe4;hle unten aus</div>
   </div>
 
   <!-- LOCATION DROPDOWN (Alternative zum QR-Scan) -->
   <div class="panel panel-sm" id="locDropdownPanel">
-    <div class="panel-title" style="margin-bottom:6px">Lagerplatz manuell wählen</div>
+    <div class="panel-title" style="margin-bottom:6px">Lagerplatz manuell w&#xe4;hlen</div>
     <div style="display:flex;gap:6px">
       <select id="selGang" style="flex:1;font-size:15px;padding:10px">
         <option value="">Gang</option>
@@ -165,14 +166,14 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
         <option value="D">Gang D</option>
         <option value="E">Gang E</option>
         <option value="F">Gang F</option>
-        <option value="RW">Rückwand</option>
+        <option value="RW">R&#xfc;ckwand</option>
         <option value="SONDER">Sonder</option>
       </select>
       <select id="selRegal" style="flex:1;font-size:15px;padding:10px" disabled>
         <option value="">Regal</option>
       </select>
-      <select id="selEbene" style="flex:1;font-size:15px;padding:10px" disabled>
-        <option value="">Ebene</option>
+      <select id="selFach" style="flex:1;font-size:15px;padding:10px" disabled>
+        <option value="">Fach</option>
       </select>
     </div>
   </div>
@@ -184,7 +185,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
       <span style="font-size:12px;color:var(--text2)" id="workerName">-</span>
     </div>
     <input type="text" class="scan-input" id="scanInput" placeholder="Scan..." autofocus inputmode="none" autocomplete="off">
-    <button class="btn btn-camera" id="btnCamera">Kamera öffnen</button>
+    <button class="btn btn-camera" id="btnCamera">Kamera &#xf6;ffnen</button>
     <div id="qr-reader" class="hidden"></div>
   </div>
 
@@ -210,12 +211,12 @@ input:focus, select:focus { outline: none; border-color: var(--accent2); box-sha
     <div style="font-size:18px;font-weight:700;margin-bottom:6px">Nicht gefunden</div>
     <div id="nfCode" style="font-family:monospace;font-size:16px">-</div>
     <p style="font-size:12px;margin-top:8px;color:var(--text2)">Manuell als unbekanntes Produkt erfassen?</p>
-    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem zählen</button>
+    <button class="btn btn-sm mt" id="btnSaveUnknown" style="background:var(--orange);color:#000;width:100%">Trotzdem z&#xe4;hlen</button>
   </div>
 
   <!-- UNDO -->
   <div class="hidden" id="undoPanel" style="margin-bottom:12px">
-    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan rückgängig</button>
+    <button class="btn btn-undo btn-sm" id="btnUndo" style="width:100%">Letzten Scan r&#xfc;ckg&#xe4;ngig</button>
   </div>
 
   <!-- LOG -->
@@ -256,7 +257,7 @@ var audioCtx = null;
 var lastScanTime = 0;
 
 // ============================================================
-// AUDIO FEEDBACK (Web Audio API – keine Dateien nötig)
+// AUDIO FEEDBACK (Web Audio API)
 // ============================================================
 function getAudioCtx() {
   if (!audioCtx) {
@@ -278,7 +279,7 @@ function playTone(freq, duration, type, volume) {
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (duration || 0.2));
     osc.stop(ctx.currentTime + (duration || 0.2));
-  } catch(e) { /* Audio nicht verfügbar */ }
+  } catch(e) {}
 }
 
 function soundSuccess() {
@@ -296,6 +297,7 @@ function soundLocationScanned() {
   playTone(660, 0.1, 'sine', 0.25);
   setTimeout(function() { playTone(880, 0.15, 'sine', 0.25); }, 120);
 }
+
 // ============================================================
 // FEEDBACK OVERLAY
 // ============================================================
@@ -333,7 +335,7 @@ function loadProducts() {
   if (!sb) return;
   sb.rpc('fetch_billbee_products', { p_page: 1, p_page_size: 250 }).then(function(res) {
     if (res.error) {
-      console.log('Billbee RPC nicht verfügbar, nutze lokale Daten');
+      console.log('Billbee RPC nicht verfuegbar, nutze lokale Daten');
       return;
     }
     var data = res.data;
@@ -384,44 +386,27 @@ function loadProducts() {
     }
   });
 }
+
 // ============================================================
 // SAVE COUNT TO SUPABASE
 // ============================================================
 function saveToSupabase(location, ean, asin, productName, qty, callback) {
-  if (!sb) {
-    if (callback) callback(false, 'Keine Verbindung');
-    return;
-  }
+  if (!sb) { if (callback) callback(false, 'Keine Verbindung'); return; }
   sb.rpc('inventur_save_count', {
-    p_location: location,
-    p_ean: ean || null,
-    p_asin: asin || null,
-    p_product_name: productName || null,
-    p_quantity: qty,
-    p_worker: workerName,
-    p_condition: 'neu',
-    p_session_id: sessionId
+    p_location: location, p_ean: ean || null, p_asin: asin || null,
+    p_product_name: productName || null, p_quantity: qty,
+    p_worker: workerName, p_condition: 'neu', p_session_id: sessionId
   }).then(function(res) {
-    if (res.error) {
-      if (callback) callback(false, res.error.message);
-    } else if (res.data && res.data.success) {
-      if (callback) callback(true);
-    } else {
-      if (callback) callback(false, res.data ? res.data.error : 'Unbekannter Fehler');
-    }
-  }).catch(function(e) {
-    if (callback) callback(false, e.message);
-  });
+    if (res.error) { if (callback) callback(false, res.error.message); }
+    else if (res.data && res.data.success) { if (callback) callback(true); }
+    else { if (callback) callback(false, res.data ? res.data.error : 'Unbekannter Fehler'); }
+  }).catch(function(e) { if (callback) callback(false, e.message); });
 }
 
 function undoLast() {
   if (!sb) return;
   sb.rpc('inventur_undo_last', { p_session_id: sessionId }).then(function(res) {
-    if (res.error) {
-      showFeedback('error', 'X', 'Fehler: ' + res.error.message);
-      soundError();
-      return;
-    }
+    if (res.error) { showFeedback('error', 'X', 'Fehler: ' + res.error.message); soundError(); return; }
     if (res.data && res.data.success) {
       scanCount--;
       if (scanCount < 0) scanCount = 0;
@@ -429,10 +414,10 @@ function undoLast() {
       updateStatsLine();
       var log = document.getElementById('scanLog');
       if (log.firstChild) log.removeChild(log.firstChild);
-      showFeedback('success', '&#8630;', 'Rückgängig');
+      showFeedback('success', '&#8630;', 'R&#xfc;ckg&#xe4;ngig');
       soundLocationScanned();
     } else {
-      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum Rückgängig machen');
+      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum R&#xfc;ckg&#xe4;ngig machen');
       soundError();
     }
   });
@@ -444,9 +429,7 @@ function undoLast() {
 function findProduct(code) {
   var upper = code.toUpperCase().trim();
   if (/^\d{13}$/.test(code)) {
-    for (var k in PRODUCTS) {
-      if (PRODUCTS[k].ean === code) return k;
-    }
+    for (var k in PRODUCTS) { if (PRODUCTS[k].ean === code) return k; }
   }
   if (/^X0/i.test(upper)) {
     for (var k in PRODUCTS) {
@@ -463,6 +446,7 @@ function findProduct(code) {
   }
   return null;
 }
+
 // ============================================================
 // STEP MANAGEMENT
 // ============================================================
@@ -473,7 +457,9 @@ function setStep(step) {
   var s3 = document.getElementById('step3');
   var scanLabel = document.getElementById('scanLabel');
   var scanInput = document.getElementById('scanInput');
+
   s1.className = 'step'; s2.className = 'step'; s3.className = 'step';
+
   if (step === 1) {
     s1.className = 'step active';
     scanLabel.textContent = 'Regal-QR scannen';
@@ -493,6 +479,7 @@ function setStep(step) {
     scanLabel.textContent = 'Menge eingeben und speichern';
     document.getElementById('undoPanel').classList.remove('hidden');
   }
+
   scanInput.value = '';
   if (step < 3) scanInput.focus();
 }
@@ -504,18 +491,21 @@ function processScan() {
   var input = document.getElementById('scanInput');
   var code = input.value.trim();
   if (!code) return;
+
   var now = Date.now();
   if (now - lastScanTime < 1500) return;
   lastScanTime = now;
-  // QR-Code für Lagerplatz?
+
+  // QR-Code f&#xfc;r Lagerplatz? (Format: LOC:A-R01-F3)
   if (code.indexOf('LOC:') === 0) {
     var loc = code.substring(4).trim();
     setLocation(loc);
     input.value = '';
     return;
   }
+
   if (scanStep === 1) {
-    if (/^[A-F]-R\d{2}-E\d{1,2}$/i.test(code) || /^RW-R\d{2}-E\d{1,2}$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
+    if (/^[A-F]-R\d{2}-F\d{1,2}$/i.test(code) || /^RW-R\d{2}-F\d{1,2}$/i.test(code) || /^(BODEN|PALETTE|EINGANG|RETOURE|VERSAND|SPERRGUT)$/i.test(code)) {
       setLocation(code.toUpperCase());
       input.value = '';
       return;
@@ -525,6 +515,7 @@ function processScan() {
     input.value = '';
     return;
   }
+
   if (scanStep === 2) {
     var key = findProduct(code);
     if (key && PRODUCTS[key]) {
@@ -543,6 +534,7 @@ function processScan() {
     return;
   }
 }
+
 function setLocation(loc) {
   currentLocation = loc;
   var badge = document.getElementById('locBadge');
@@ -559,11 +551,11 @@ function getLocationLabel(loc) {
   if (parts.length === 3) {
     var gang = parts[0];
     var regal = parts[1].replace('R', 'Regal ');
-    var ebene = parts[2].replace('E', 'Ebene ');
-    if (gang === 'RW') return 'Rückwand, ' + regal + ', ' + ebene;
-    return 'Gang ' + gang + ', ' + regal + ', ' + ebene;
+    var fach = parts[2].replace('F', 'Fach ');
+    if (gang === 'RW') return 'R&#xfc;ckwand, ' + regal + ', ' + fach;
+    return 'Gang ' + gang + ', ' + regal + ', ' + fach;
   }
-  var names = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var names = { 'BODEN': 'Bodenfl&#xe4;che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   return names[loc] || loc;
 }
 
@@ -573,14 +565,17 @@ function showProduct(key, scanCode) {
   currentAsin = p.asin || key;
   currentProductName = p.title || '';
   currentQty = 1;
+
   document.getElementById('piTitle').textContent = p.title || '(kein Titel)';
   document.getElementById('piEan').textContent = p.ean || '-';
   document.getElementById('piAsin').textContent = p.asin || key;
   document.getElementById('piFnsku').textContent = p.fnsku || '-';
   document.getElementById('piEk').textContent = p.ek ? p.ek.toFixed(2) + ' EUR' : '-';
   document.getElementById('qtyVal').textContent = '1';
+
   document.getElementById('productPanel').classList.remove('hidden');
   document.getElementById('notFoundCard').classList.add('hidden');
+
   soundLocationScanned();
   setStep(3);
 }
@@ -589,17 +584,16 @@ function showProduct(key, scanCode) {
 // SAVE
 // ============================================================
 function saveCount() {
-  if (!currentLocation) {
-    showFeedback('error', '!', 'Kein Regal gewählt');
-    soundError();
-    return;
-  }
+  if (!currentLocation) { showFeedback('error', '!', 'Kein Regal gew&#xe4;hlt'); soundError(); return; }
+
   var qty = currentQty;
   var loc = currentLocation;
   var ean = currentEan;
   var asin = currentAsin;
   var name = currentProductName;
+
   document.getElementById('btnSave').disabled = true;
+
   saveToSupabase(loc, ean, asin, name, qty, function(success, error) {
     document.getElementById('btnSave').disabled = false;
     if (success) {
@@ -609,14 +603,10 @@ function saveCount() {
       document.getElementById('scanCount').textContent = scanCount;
       updateStatsLine();
       addLogEntry(loc, ean || asin || '?', name, qty);
-      // Reset für nächstes Produkt
       document.getElementById('productPanel').classList.add('hidden');
       document.getElementById('notFoundCard').classList.add('hidden');
-      currentEan = '';
-      currentAsin = '';
-      currentProductName = '';
-      currentQty = 1;
-      setStep(2); // Zurück zu Produkt scannen (gleiches Regal)
+      currentEan = ''; currentAsin = ''; currentProductName = ''; currentQty = 1;
+      setStep(2);
     } else {
       soundError();
       showFeedback('error', 'X', 'Fehler: ' + (error || ''));
@@ -636,6 +626,7 @@ function saveUnknown() {
   document.getElementById('notFoundCard').classList.add('hidden');
   setStep(3);
 }
+
 // ============================================================
 // LOG
 // ============================================================
@@ -657,30 +648,34 @@ function updateStatsLine() {
 }
 
 // ============================================================
-// CAMERA (html5-qrcode Library – funktioniert auf allen Geräten)
+// CAMERA (html5-qrcode)
 // ============================================================
 function toggleCamera() {
   var btn = document.getElementById('btnCamera');
   var readerDiv = document.getElementById('qr-reader');
+
   if (cameraActive) {
     if (html5QrCode) {
       html5QrCode.stop().then(function() {
         html5QrCode.clear();
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera öffnen';
+        btn.textContent = 'Kamera &#xf6;ffnen';
         cameraActive = false;
       }).catch(function() {
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera öffnen';
+        btn.textContent = 'Kamera &#xf6;ffnen';
         cameraActive = false;
       });
     }
     return;
   }
+
   getAudioCtx();
   readerDiv.classList.remove('hidden');
-  btn.textContent = 'Kamera schließen';
+  btn.textContent = 'Kamera schlie&#xdf;en';
+
   html5QrCode = new Html5Qrcode('qr-reader');
+
   var config = {
     fps: 10,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
@@ -698,6 +693,7 @@ function toggleCamera() {
       Html5QrcodeSupportedFormats.UPC_A
     ]
   };
+
   html5QrCode.start(
     { facingMode: 'environment' },
     config,
@@ -713,21 +709,22 @@ function toggleCamera() {
     cameraActive = true;
   }).catch(function(err) {
     readerDiv.classList.add('hidden');
-    btn.textContent = 'Kamera öffnen';
+    btn.textContent = 'Kamera &#xf6;ffnen';
     showFeedback('error', 'X', 'Kamera: ' + err);
     soundError();
   });
 }
+
 // ============================================================
 // INIT
 // ============================================================
 function init() {
   var d = new Date();
   sessionId = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
   var savedName = localStorage.getItem('inv_scanner_name') || '';
   if (savedName) document.getElementById('setupName').value = savedName;
 
-  // ===== EVENTS =====
   document.getElementById('btnStart').addEventListener('click', function() {
     var name = document.getElementById('setupName').value.trim();
     if (!name) { alert('Bitte Name eingeben!'); return; }
@@ -741,10 +738,7 @@ function init() {
   });
 
   document.getElementById('scanInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      processScan();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); processScan(); }
   });
 
   document.getElementById('btnSave').addEventListener('click', saveCount);
@@ -764,30 +758,30 @@ function init() {
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
     currentLocation = '';
     document.getElementById('locBadge').classList.remove('scanned');
-    document.getElementById('locName').textContent = '– kein Regal –';
-    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder wähle unten aus';
+    document.getElementById('locName').textContent = '&#x2013; kein Regal &#x2013;';
+    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder w&#xe4;hle unten aus';
     document.getElementById('selGang').value = '';
     document.getElementById('selRegal').innerHTML = '<option value="">Regal</option>';
     document.getElementById('selRegal').disabled = true;
-    document.getElementById('selEbene').innerHTML = '<option value="">Ebene</option>';
-    document.getElementById('selEbene').disabled = true;
+    document.getElementById('selFach').innerHTML = '<option value="">Fach</option>';
+    document.getElementById('selFach').disabled = true;
     setStep(1);
   });
 
-  // ===== DROPDOWN: Gang → Regal → Ebene =====
+  // ===== DROPDOWN: Gang > Regal > Fach =====
   var GANG_REGALE = { 'A': 5, 'B': 5, 'C': 5, 'D': 6, 'E': 6, 'F': 6 };
   var RW_REGALE_COUNT = 2;
   var SONDER_PLAETZE = ['BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT'];
-  var SONDER_NAMEN = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
-  var DEFAULT_EBENEN = 10;
+  var SONDER_NAMEN = { 'BODEN': 'Bodenfl&#xe4;che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var DEFAULT_FACHBOEDEN = 10;
 
   document.getElementById('selGang').addEventListener('change', function() {
     var gang = this.value;
     var selRegal = document.getElementById('selRegal');
-    var selEbene = document.getElementById('selEbene');
+    var selFach = document.getElementById('selFach');
     selRegal.innerHTML = '<option value="">Regal</option>';
-    selEbene.innerHTML = '<option value="">Ebene</option>';
-    selEbene.disabled = true;
+    selFach.innerHTML = '<option value="">Fach</option>';
+    selFach.disabled = true;
     if (!gang) { selRegal.disabled = true; return; }
     if (gang === 'SONDER') {
       for (var i = 0; i < SONDER_PLAETZE.length; i++) {
@@ -812,25 +806,25 @@ function init() {
   document.getElementById('selRegal').addEventListener('change', function() {
     var gang = document.getElementById('selGang').value;
     var regal = this.value;
-    var selEbene = document.getElementById('selEbene');
-    selEbene.innerHTML = '<option value="">Ebene</option>';
-    if (!regal) { selEbene.disabled = true; return; }
+    var selFach = document.getElementById('selFach');
+    selFach.innerHTML = '<option value="">Fach</option>';
+    if (!regal) { selFach.disabled = true; return; }
     if (gang === 'SONDER') { setLocation(regal); return; }
-    for (var e = 1; e <= DEFAULT_EBENEN; e++) {
+    for (var f = 1; f <= DEFAULT_FACHBOEDEN; f++) {
       var opt = document.createElement('option');
-      opt.value = 'E' + e;
-      opt.textContent = 'Ebene ' + e;
-      selEbene.appendChild(opt);
+      opt.value = 'F' + f;
+      opt.textContent = 'Fach ' + f;
+      selFach.appendChild(opt);
     }
-    selEbene.disabled = false;
+    selFach.disabled = false;
   });
 
-  document.getElementById('selEbene').addEventListener('change', function() {
+  document.getElementById('selFach').addEventListener('change', function() {
     var gang = document.getElementById('selGang').value;
     var regal = document.getElementById('selRegal').value;
-    var ebene = this.value;
-    if (!gang || !regal || !ebene) return;
-    var loc = gang + '-' + regal + '-' + ebene;
+    var fach = this.value;
+    if (!gang || !regal || !fach) return;
+    var loc = gang + '-' + regal + '-' + fach;
     setLocation(loc);
   });
 
