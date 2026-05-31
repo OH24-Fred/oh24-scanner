@@ -871,6 +871,20 @@ function init() {
     selFach.disabled = false;
   });
 
+
   document.getElementById('selFach').addEventListener('change', function() {
     var gang = document.getElementById('selGang').value;
-    var regal = document.getElementById('se
+    var regal = document.getElementById('selRegal').value;
+    var fach = this.value;
+    if (fach && regal && gang) {
+      setLocation(gang + '-' + regal + '-' + fach);
+    }
+  });
+
+  initSupabase();
+}
+
+init();
+</script>
+</body>
+</html>
