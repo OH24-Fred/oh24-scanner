@@ -27,7 +27,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .panel-sm { padding: 10px 14px; }
 .panel-title { font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 8px; }
 
-input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; }
+input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; -webkit-user-select: text; user-select: text; }
 input:focus, select:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
 
 .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: opacity 0.1s; }
@@ -826,5 +826,4 @@ function init() {
     selFach.disabled = true;
     if (!gang) { selRegal.disabled = true; return; }
     if (gang === 'SONDER') {
-      for (var i = 0; i < SONDER_PLAETZE.length; i++) {
-       
+      for (var i 
