@@ -12,7 +12,7 @@
   --text2: #94a3b8; --border: #334155;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; -webkit-user-select: none; user-select: none; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; min-height: 100vh; }
 
 .header { background: var(--bg2); border-bottom: 2px solid var(--accent); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
 .header h1 { font-size: 17px; } .header h1 span { color: var(--accent); }
@@ -27,10 +27,10 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .panel-sm { padding: 10px 14px; }
 .panel-title { font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 8px; }
 
-input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; -webkit-user-select: text; user-select: text; }
+input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-size: 16px; width: 100%; -webkit-user-select: text; user-select: text; -webkit-appearance: none; appearance: none; touch-action: manipulation; }
 input:focus, select:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
 
-.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: opacity 0.1s; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: opacity 0.1s; touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
 .btn:active { opacity: 0.7; }
 .btn-save { background: var(--green); color: #000; font-size: 20px; }
 .btn-save:disabled { opacity: 0.3; }
@@ -826,4 +826,54 @@ function init() {
     selFach.disabled = true;
     if (!gang) { selRegal.disabled = true; return; }
     if (gang === 'SONDER') {
-      for (var i 
+      for (var i = 0; i < SONDER_PLAETZE.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = SONDER_PLAETZE[i];
+        opt.textContent = SONDER_NAMEN[SONDER_PLAETZE[i]] || SONDER_PLAETZE[i];
+        selRegal.appendChild(opt);
+      }
+      selRegal.disabled = false;
+      return;
+    }
+    var regale = (gang === 'RW') ? RW_REGALE_COUNT : (GANG_REGALE[gang] || 5);
+    for (var r = 1; r <= regale; r++) {
+      var opt = document.createElement('option');
+      opt.value = 'R' + String(r).padStart(2, '0');
+      opt.textContent = 'Regal ' + String(r).padStart(2, '0');
+      selRegal.appendChild(opt);
+    }
+    selRegal.disabled = false;
+  });
+
+  document.getElementById('selRegal').addEventListener('change', function() {
+    var gang = document.getElementById('selGang').value;
+    var regal = this.value;
+    var selFach = document.getElementById('selFach');
+    selFach.innerHTML = '<option value="">Fach</option>';
+    if (!regal) { selFach.disabled = true; return; }
+    if (gang === 'SONDER') { setLocation(regal); return; }
+    for (var f = 1; f <= DEFAULT_FACHBOEDEN; f++) {
+      var opt = document.createElement('option');
+      opt.value = 'F' + f;
+      opt.textContent = 'Fach ' + f;
+      selFach.appendChild(opt);
+    }
+    selFach.disabled = false;
+  });
+
+  document.getElementById('selFach').addEventListener('change', function() {
+    var gang = document.getElementById('selGang').value;
+    var regal = document.getElementById('selRegal').value;
+    var fach = this.value;
+    if (!gang || !regal || !fach) return;
+    var loc = gang + '-' + regal + '-' + fach;
+    setLocation(loc);
+  });
+
+  initSupabase();
+}
+
+try { init(); } catch(e) { alert('Init-Fehler: ' + e.message); }
+</script>
+</body>
+</html>
