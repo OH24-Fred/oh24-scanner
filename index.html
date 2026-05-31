@@ -418,10 +418,10 @@ function undoLast() {
       updateStatsLine();
       var log = document.getElementById('scanLog');
       if (log.firstChild) log.removeChild(log.firstChild);
-      showFeedback('success', '&#8630;', 'R&#xfc;ckg&#xe4;ngig');
+      showFeedback('success', '↶', 'Rückgängig');
       soundLocationScanned();
     } else {
-      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum R&#xfc;ckg&#xe4;ngig machen');
+      showFeedback('error', 'X', res.data ? res.data.error : 'Nichts zum Rückgängig machen');
       soundError();
     }
   });
@@ -500,7 +500,7 @@ function processScan() {
   if (now - lastScanTime < 500) return;
   lastScanTime = now;
 
-  // QR-Code f&#xfc;r Lagerplatz? (Format: LOC:A-R01-F3)
+  // QR-Code für Lagerplatz? (Format: LOC:A-R01-F3)
   if (code.indexOf('LOC:') === 0) {
     var loc = code.substring(4).trim();
     setLocation(loc);
@@ -556,10 +556,10 @@ function getLocationLabel(loc) {
     var gang = parts[0];
     var regal = parts[1].replace('R', 'Regal ');
     var fach = parts[2].replace('F', 'Fach ');
-    if (gang === 'RW') return 'R&#xfc;ckwand, ' + regal + ', ' + fach;
+    if (gang === 'RW') return 'Rückwand, ' + regal + ', ' + fach;
     return 'Gang ' + gang + ', ' + regal + ', ' + fach;
   }
-  var names = { 'BODEN': 'Bodenfl&#xe4;che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var names = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   return names[loc] || loc;
 }
 
@@ -588,7 +588,7 @@ function showProduct(key, scanCode) {
 // SAVE
 // ============================================================
 function saveCount() {
-  if (!currentLocation) { showFeedback('error', '!', 'Kein Regal gew&#xe4;hlt'); soundError(); return; }
+  if (!currentLocation) { showFeedback('error', '!', 'Kein Regal gewählt'); soundError(); return; }
 
   var qty = currentQty;
   var loc = currentLocation;
@@ -663,11 +663,11 @@ function toggleCamera() {
       html5QrCode.stop().then(function() {
         html5QrCode.clear();
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera &#xf6;ffnen';
+        btn.textContent = 'Kamera öffnen';
         cameraActive = false;
       }).catch(function() {
         readerDiv.classList.add('hidden');
-        btn.textContent = 'Kamera &#xf6;ffnen';
+        btn.textContent = 'Kamera öffnen';
         cameraActive = false;
       });
     }
@@ -676,7 +676,7 @@ function toggleCamera() {
 
   getAudioCtx();
   readerDiv.classList.remove('hidden');
-  btn.textContent = 'Kamera schlie&#xdf;en';
+  btn.textContent = 'Kamera schließen';
 
   html5QrCode = new Html5Qrcode('qr-reader');
 
@@ -713,7 +713,7 @@ function toggleCamera() {
     cameraActive = true;
   }).catch(function(err) {
     readerDiv.classList.add('hidden');
-    btn.textContent = 'Kamera &#xf6;ffnen';
+    btn.textContent = 'Kamera öffnen';
     showFeedback('error', 'X', 'Kamera: ' + err);
     soundError();
   });
@@ -800,8 +800,8 @@ function init() {
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
     currentLocation = '';
     document.getElementById('locBadge').classList.remove('scanned');
-    document.getElementById('locName').textContent = '&#x2013; kein Regal &#x2013;';
-    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder w&#xe4;hle unten aus';
+    document.getElementById('locName').textContent = '– kein Regal –';
+    document.getElementById('locDetail').textContent = 'Scanne den QR-Code am Regal oder wähle unten aus';
     document.getElementById('selGang').value = '';
     document.getElementById('selRegal').innerHTML = '<option value="">Regal</option>';
     document.getElementById('selRegal').disabled = true;
@@ -814,7 +814,7 @@ function init() {
   var GANG_REGALE = { 'A': 5, 'B': 5, 'C': 5, 'D': 6, 'E': 6, 'F': 6 };
   var RW_REGALE_COUNT = 2;
   var SONDER_PLAETZE = ['BODEN', 'PALETTE', 'EINGANG', 'RETOURE', 'VERSAND', 'SPERRGUT'];
-  var SONDER_NAMEN = { 'BODEN': 'Bodenfl&#xe4;che', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
+  var SONDER_NAMEN = { 'BODEN': 'Bodenfläche', 'PALETTE': 'Palettenplatz', 'EINGANG': 'Wareneingang', 'RETOURE': 'Retourenbereich', 'VERSAND': 'Versandbereich', 'SPERRGUT': 'Sperrgut-Lager' };
   var DEFAULT_FACHBOEDEN = 10;
 
   document.getElementById('selGang').addEventListener('change', function() {
@@ -877,3 +877,5 @@ try { init(); } catch(e) { alert('Init-Fehler: ' + e.message); }
 </script>
 </body>
 </html>
+    if (!gang) { selRegal.disabled = true; return; }
+    if (gang === 
