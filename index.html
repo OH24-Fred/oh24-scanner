@@ -487,13 +487,13 @@ function setStep(step) {
 // ============================================================
 // SCAN PROCESSING
 // ============================================================
-function processScan() {
+function processScan(skipDebounce) {
   var input = document.getElementById('scanInput');
   var code = input.value.trim();
   if (!code) return;
 
   var now = Date.now();
-  if (now - lastScanTime < 800) return;
+  if (!skipDebounce && now - lastScanTime < 800) return;
   lastScanTime = now;
 
   // QR-Code Lagerplatz
@@ -685,7 +685,7 @@ function toggleCamera() {
       if (now - lastScanTime < 1500) return;
       lastScanTime = now;
       document.getElementById('scanInput').value = text;
-      processScan();
+      processScan(true);
     },
     function onFail() {}
   ).then(function(){ cameraActive = true; }).catch(function(err){
