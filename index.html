@@ -583,14 +583,24 @@ function processScan(skipDebounce) {
     if (key && PRODUCTS[key]) {
       showProduct(key, code);
     } else {
-      document.getElementById('nfCode').textContent = code;
-      document.getElementById('notFoundCard').classList.remove('hidden');
-      document.getElementById('productPanel').classList.add('hidden');
-      currentEan = /^\d{13}$/.test(code) ? code : '';
-      currentAsin = /^B0/i.test(code) ? code.toUpperCase() : '';
-      currentProductName = 'Unbekannt (' + code + ')';
-      soundError();
-      showFeedback('error', '?', 'Nicht gefunden');
+      // Live-Lookup in Supabase wenn lokal nicht gefunden
+      var _code = code;
+      input.value = '';
+      supabaseLiveLookup(_code, function(found, foundKey) {
+        if (found && foundKey) {
+          showProduct(foundKey, _code);
+        } else {
+          document.getElementById('nfCode').textContent = _code;
+          document.getElementById('notFoundCard').classList.remove('hidden');
+          document.getElementById('productPanel').classList.add('hidden');
+          currentEan = /^\d{13}$/.test(_code) ? _code : '';
+          currentAsin = /^B0/i.test(_code) ? _code.toUpperCase() : '';
+          currentProductName = 'Unbekannt (' + _code + ')';
+          soundError();
+          showFeedback('error', '?', 'Nicht gefunden');
+        }
+      });
+      return;
     }
     input.value = '';
   }
@@ -768,6 +778,58 @@ function toggleCamera() {
 // ============================================================
 // INIT
 // ============================================================
+// Live-Suche in Supabase wenn Produkt lokal nicht gefunden
+function supabaseLiveLookup(code, callback) {
+  if (!sb || !connected) { callback(false); return; }
+  var upper = code.toUpperCase().trim();
+  // Suche nach FNSKU, EAN oder ASIN in der products-Tabelle
+  var queries = [];
+  if (/^X/i.test(upper) || /^[A-Z]\d/i.test(upper)) {
+    queries.push(sb.from('products').select('*').eq('fnsku', upper).limit(1));
+    queries.push(sb.from('products').select('*').ilike('sku', '%' + upper + '%').limit(1));
+    // Auch in arbitrageone_products suchen
+    queries.push(sb.from('arbitrageone_products').select('*').eq('fnsku', upper).limit(1));
+  }
+  if (/^\d{13}$/.test(code)) {
+    queries.push(sb.from('products').select('*').eq('ean', code).limit(1));
+    queries.push(sb.from('arbitrageone_products').select('*').eq('ean', code).limit(1));
+  }
+  if (/^B0/i.test(upper)) {
+    queries.push(sb.from('products').select('*').eq('asin', upper).limit(1));
+    queries.push(sb.from('arbitrageone_products').select('*').eq('asin', upper).limit(1));
+  }
+  if (queries.length === 0) { callback(false); return; }
+  
+  var found = false;
+  var remaining = queries.length;
+  
+  for (var q = 0; q < queries.length; q++) {
+    (function(query) {
+      query.then(function(res) {
+        remaining--;
+        if (found) return;
+        if (!res.error && res.data && res.data.length > 0) {
+          var r = res.data[0];
+          var key = r.asin || upper;
+          if (!PRODUCTS[key]) {
+            PRODUCTS[key] = { asin: r.asin||key, ean: r.ean||'', fnsku: r.fnsku||'', sku: r.sku||'', title: r.title||r.name||'', ek: parseFloat(r.ek_netto)||0 };
+            if (r.ean) PRODUCTS['EAN_' + r.ean] = PRODUCTS[key];
+          }
+          found = true;
+          soundLoc();
+          showFeedback('success', '✓', 'Aus Supabase geladen');
+          callback(true, key);
+        } else if (remaining === 0 && !found) {
+          callback(false);
+        }
+      }).catch(function() {
+        remaining--;
+        if (remaining === 0 && !found) callback(false);
+      });
+    })(queries[q]);
+  }
+}
+
 function init() {
   var d = new Date();
   sessionId = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
