@@ -321,7 +321,29 @@ function loadProducts() {
     document.getElementById('syncBadge').textContent = 'Online (' + count + ')';
   });
 
-  // 3. Billbee (optional)
+  // 3. Products table (alle importierten Daten vom Laptop)
+  sb.from('products').select('asin,ean,fnsku,sku,title,ek_netto,vk,fulfillment').limit(5000).then(function(res) {
+    if (res.error || !res.data) { console.log('Products table:', res.error); return; }
+    for (var i = 0; i < res.data.length; i++) {
+      var r = res.data[i];
+      var key = r.asin || r.ean || ('P_' + i);
+      if (!PRODUCTS[key]) {
+        PRODUCTS[key] = { asin: r.asin||'', ean: r.ean||'', fnsku: r.fnsku||'', sku: r.sku||'', title: r.title||'', ek: parseFloat(r.ek_netto)||0 };
+        if (r.ean && !PRODUCTS['EAN_' + r.ean]) PRODUCTS['EAN_' + r.ean] = PRODUCTS[key];
+      } else {
+        // Ergaenze fehlende Daten
+        if (r.ean && !PRODUCTS[key].ean) PRODUCTS[key].ean = r.ean;
+        if (r.fnsku && !PRODUCTS[key].fnsku) PRODUCTS[key].fnsku = r.fnsku;
+        if (r.title && !PRODUCTS[key].title) PRODUCTS[key].title = r.title;
+        if (r.ek_netto && !PRODUCTS[key].ek) PRODUCTS[key].ek = parseFloat(r.ek_netto)||0;
+      }
+    }
+    count = 0; for (var k in PRODUCTS) { if (k.indexOf('EAN_') !== 0) count++; }
+    document.getElementById('syncBadge').textContent = 'Online (' + count + ')';
+    console.log('Products table: ' + res.data.length + ' geladen');
+  });
+
+  // 4. Billbee (optional)
   sb.rpc('fetch_billbee_products', { p_page: 1, p_page_size: 250 }).then(function(res) {
     if (res.error || !res.data || !res.data.Data) return;
     var items = res.data.Data;
