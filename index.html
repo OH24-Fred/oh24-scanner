@@ -552,7 +552,7 @@ function setStep(step) {
     document.getElementById('btnSave').disabled = false;
   }
   document.getElementById('scanInput').value = '';
-  if (step < 3) { document.getElementById('scanInput').focus(); }
+  if (step < 3) { lastScanTime = 0; document.getElementById('scanInput').focus(); }
 }
 
 // ============================================================
@@ -763,7 +763,7 @@ function toggleCamera() {
   html5QrCode.start({facingMode:'environment'}, config,
     function onSuccess(text) {
       var now = Date.now();
-      if (now - lastScanTime < 1500) return;
+      if (now - lastScanTime < 800) return;
       lastScanTime = now;
       document.getElementById('scanInput').value = text;
       processScan(true);
@@ -896,6 +896,7 @@ function init() {
   // REGAL WECHSELN
   document.getElementById('btnChangeLoc').addEventListener('click', function() {
     currentLocation = '';
+    lastScanTime = 0; // Debounce reset
     document.getElementById('locBadge').classList.remove('scanned');
     document.getElementById('locName').textContent = '– kein Regal –';
     document.getElementById('locDetail').textContent = '';
