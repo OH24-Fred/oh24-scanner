@@ -315,6 +315,12 @@ function loadProducts() {
       if (!PRODUCTS[key]) {
         PRODUCTS[key] = { asin: r.asin||'', ean: r.ean||'', fnsku: r.fnsku||'', sku: '', title: r.name||'', ek: parseFloat(r.ek_netto)||0 };
         if (r.ean && !PRODUCTS['EAN_' + r.ean]) PRODUCTS['EAN_' + r.ean] = PRODUCTS[key];
+      } else {
+        // Ergaenze nur fehlende Daten, NICHT ueberschreiben!
+        if (r.ean && !PRODUCTS[key].ean) PRODUCTS[key].ean = r.ean;
+        if (r.fnsku && !PRODUCTS[key].fnsku) PRODUCTS[key].fnsku = r.fnsku;
+        if (r.name && !PRODUCTS[key].title) PRODUCTS[key].title = r.name;
+        if (r.ek_netto && !PRODUCTS[key].ek) PRODUCTS[key].ek = parseFloat(r.ek_netto)||0;
       }
     }
     count = 0; for (var k in PRODUCTS) { if (k.indexOf('EAN_') !== 0) count++; }
@@ -495,6 +501,8 @@ function findProduct(code) {
       if (k.indexOf('EAN_') === 0) continue;
       if (PRODUCTS[k].fnsku && PRODUCTS[k].fnsku.toUpperCase() === upper) return k;
     }
+    // DEBUG: zeige was gesucht wird
+    console.log('FNSKU exact search failed for: ' + upper + ', trying fuzzy...');
     // Fuzzy-Suche mit Zeichenverwechslungen (0↔O, 1↔I, 5↔S, 8↔B, etc.)
     var fuzzy = fuzzyFnskuLookup(code);
     if (fuzzy) return fuzzy;
@@ -598,6 +606,7 @@ function processScan(skipDebounce) {
           currentProductName = 'Unbekannt (' + _code + ')';
           soundError();
           showFeedback('error', '?', 'Nicht gefunden');
+          console.log('NOT FOUND after live lookup: ' + _code);
         }
       });
       return;
