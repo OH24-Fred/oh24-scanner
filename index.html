@@ -613,6 +613,40 @@ function processScan(skipDebounce) {
     }
     input.value = '';
   }
+
+  // Step 3: Wenn in Menge-Step ein neuer Barcode gescannt wird → als neues Produkt behandeln
+  if (scanStep === 3) {
+    // Aktuelles Produkt verwerfen, zurück zu Step 2 mit neuem Code
+    currentEan = ''; currentAsin = ''; currentProductName = ''; currentQty = 1;
+    document.getElementById('productPanel').classList.add('hidden');
+    document.getElementById('notFoundCard').classList.add('hidden');
+    document.getElementById('dupWarning').classList.add('hidden');
+    scanStep = 2;
+    // Neuen Code verarbeiten
+    dupForceMode = false;
+    var key = findProduct(code);
+    if (key && PRODUCTS[key]) {
+      showProduct(key, code);
+    } else {
+      var _code2 = code;
+      input.value = '';
+      supabaseLiveLookup(_code2, function(found, foundKey) {
+        if (found && foundKey) {
+          showProduct(foundKey, _code2);
+        } else {
+          document.getElementById('nfCode').textContent = _code2;
+          document.getElementById('notFoundCard').classList.remove('hidden');
+          currentEan = /^\d{13}$/.test(_code2) ? _code2 : '';
+          currentAsin = /^B0/i.test(_code2) ? _code2.toUpperCase() : '';
+          currentProductName = 'Unbekannt (' + _code2 + ')';
+          soundError();
+          showFeedback('error', '?', 'Nicht gefunden');
+        }
+      });
+      return;
+    }
+    input.value = '';
+  }
 }
 
 function setLocation(loc) {
