@@ -94,6 +94,7 @@ body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:
       <div class="field field-wide"><label>SKU (Amazon)</label><input id="fSkuAmz"></div>
       <div class="field"><label>SKU (Kaufland)</label><input id="fSkuKl"></div>
       <div class="field"><label>Erfasser / Datum</label><input id="fErfasser" readonly></div>
+      <div class="field field-wide"><label>Bemerkung</label><input id="fBemerkung" placeholder="z.B. beschädigt, falsch etikettiert, nachzählen..."></div>
     </div>
     <div class="links" id="linkBar"></div>
   </div>
@@ -198,7 +199,7 @@ function render() {
   document.getElementById('fName').value = d.n || '';
   document.getElementById('fSkuAmz').value = d.sa || '';
   document.getElementById('fSkuKl').value = d.sk || '';
-  document.getElementById('fErfasser').value = (d.er || '') + ' | ' + (d.d || '') + ' ' + (d.u || '');
+  document.getElementById('fErfasser').value = (d.er || '') + ' | ' + (d.d || '') + ' ' + (d.u || ''); document.getElementById('fBemerkung').value = d.bm || '';
 
   // Highlight changed fields
   var fields = ['fAsin','fEan','fFnsku','fEk','fName','fSkuAmz','fSkuKl','fMenge'];
@@ -229,7 +230,7 @@ function saveCurrentPos() {
     ek: parseFloat(document.getElementById('fEk').value) || 0,
     n: document.getElementById('fName').value.trim(),
     sa: document.getElementById('fSkuAmz').value.trim(),
-    sk: document.getElementById('fSkuKl').value.trim(),
+    sk: document.getElementById('fSkuKl').value.trim(), bm: document.getElementById('fBemerkung').value.trim(),
     m: parseInt(document.getElementById('fMenge').value) || 0,
     st: document.getElementById('fAsin').value.trim() ? 'OK' : d.st
   };
@@ -289,7 +290,7 @@ function exportExcel() {
   var rows = [['Pos','Lagerplatz','FNSKU_Scan','EAN_Scan','ASIN','Produktname','EAN','FNSKU','SKU_Amazon','SKU_Kaufland','EK_netto','Menge','Wert_netto','Erfasser','Datum','Uhrzeit','Status']];
   for (var i = 0; i < DATA.length; i++) {
     var d = getItem(i);
-    rows.push([d.p,d.l,d.fs,d.es,d.a,d.n,d.e,d.f,d.sa,d.sk,d.ek,d.m,d.ek*d.m,d.er,d.d,d.u,changes[i]?'KORRIGIERT':d.st]);
+    rows.push([d.p,d.l,d.fs,d.es,d.a,d.n,d.e,d.f,d.sa,d.sk,d.ek,d.m,d.ek*d.m,d.er,d.d,d.u,changes[i]?'KORRIGIERT':d.st,d.bm||'']);
   }
   var ws = XLSX.utils.aoa_to_sheet(rows);
   var wb = XLSX.utils.book_new();
